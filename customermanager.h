@@ -16,8 +16,8 @@ class customerManager : public QMainWindow
 public:
     customerManager(QWidget *parent = nullptr);
     ~customerManager();
-
 private:
     Ui::customerManager *ui;
+    void MM_addCustomerClicked();
 };
 #endif // CUSTOMERMANAGER_H
