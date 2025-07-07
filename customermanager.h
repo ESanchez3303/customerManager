@@ -1,7 +1,10 @@
 #ifndef CUSTOMERMANAGER_H
 #define CUSTOMERMANAGER_H
 
+#include "customer.h"
 #include <QMainWindow>
+#include <QFrame>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,6 +21,27 @@ public:
     ~customerManager();
 private:
     Ui::customerManager *ui;
+
+// Customer object
+    customer current_customer;
+
+
+// Constants for styles
+    QString const errorStyle = "color:white;background:red;";
+    QString const normalStyle = "color:black;background:white;";
+
+
+// Frame Control
+    void switchFrame(QFrame* targetFrame);
+
+
+// Main Menu Functions
     void MM_addCustomerClicked();
+
+
+// Adding Customer Functions
+    void AC_backButtonClicked();
+    void AC_markError(QLineEdit* target);
+    void AC_savedCustomerButtonClicked();
 };
 #endif // CUSTOMERMANAGER_H
