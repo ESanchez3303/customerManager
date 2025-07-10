@@ -2,6 +2,8 @@
 #include "./ui_customermanager.h"
 #include <iostream>
 #include <QMessageBox>
+#include <string>
+#include <filesystem>
 using namespace std;
 
 // Destructor
@@ -19,6 +21,16 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->MM_addCustomerButton, &QPushButton::clicked, this, &customerManager::MM_addCustomerClicked);
     connect(ui->AC_backButton, &QPushButton::clicked, this, &customerManager::AC_backButtonClicked);
     connect(ui->AC_saveCustomerButton, &QPushButton::clicked, this, &customerManager::AC_savedCustomerButtonClicked);
+    connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
+    connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
+
+
+
+
+    // Setting the tab orders
+    setTabOrder(ui->AC_nameInput, ui->AC_phoneInput);
+    setTabOrder(ui->AC_phoneInput, ui->AC_balanceInput);
+    setTabOrder(ui->AC_balanceInput, ui->AC_saveCustomerButton);
 
 
     // Switching to Main Menu Frame
@@ -27,7 +39,12 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
 }
 
 
-// Frame Control:
+
+
+
+
+
+// Frame Control: ========================================================================================================================
 void customerManager::switchFrame(QFrame* targetFrame){
     // Hiding all frames
     ui->MM_frame->hide();
@@ -37,7 +54,9 @@ void customerManager::switchFrame(QFrame* targetFrame){
 
     // Resetting the frame that we are going into
     if(targetFrame == ui->MM_frame){
-
+        ui->MM_customerDisplay->clear();
+        ui->MM_searchBar->clear();
+        populateCustomerDisplay();
     }
     else if(targetFrame == ui->AC_frame){
         // Resetting the values
@@ -51,19 +70,44 @@ void customerManager::switchFrame(QFrame* targetFrame){
     }
 
     else if(targetFrame == ui->C_frame){
-
+        ui->C_weightInput->setValue(0);
+        ui->C_priceInput->setValue(0);
+        calculateButtonClicked();
     }
 
     // Show the frame
     targetFrame->show();
 }
 
-// Main Menu Functions:
+
+
+
+
+// Main Menu Functions: ========================================================================================================================
 void customerManager::MM_addCustomerClicked(){ switchFrame(ui->AC_frame); }
 
 
+void customerManager::populateCustomerDisplay(){
+    // Loading in the customers into the customerDispaly by only the names, no other information is loaded
+    namespace fs = std::filesystem;
+    QString customerPath = QString::fromStdString(filePath);
 
-// Adding Customer Functions
+
+    try {
+        for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {
+            if (entry.is_regular_file()) {
+                QString fileName = QString::fromStdString(entry.path().filename().string());
+                ui->MM_customerDisplay->addItem(fileName);
+            }
+        }
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "ERORR", "Could not open a file");
+    }
+}
+
+
+
+// Adding Customer Functions ============================================================================================================
 void customerManager::AC_backButtonClicked(){ switchFrame(ui->MM_frame); }
 
 void customerManager::AC_markError(QLineEdit* target){
@@ -125,6 +169,18 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
 
+// Calculator Functions: ============================================================================================================
+void customerManager::calculatorButtonClicked(){
+    switchFrame(ui->C_frame);
+}
+
+
+
+void customerManager::calculateButtonClicked(){
+    // Multiplying and showing the results in the output box
+    QString product = QString::number((ui->C_priceInput->value() * ui->C_weightInput->value()), 'f', 2);
+    ui->C_output->setText(product);
+}
 
 
 

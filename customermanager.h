@@ -38,11 +38,17 @@ private:
 
 // Main Menu Functions
     void MM_addCustomerClicked();
+    void populateCustomerDisplay();
 
 
 // Adding Customer Functions
     void AC_backButtonClicked();
     void AC_markError(QLineEdit* target);
     void AC_savedCustomerButtonClicked();
+
+
+// Calculator Function
+    void calculatorButtonClicked();
+    void calculateButtonClicked();
 };
 #endif // CUSTOMERMANAGER_H
