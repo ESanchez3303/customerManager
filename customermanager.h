@@ -24,6 +24,7 @@ private:
 
 // Customer object
     customer current_customer;
+    string filePath = "customers";
 
 
 // Constants for styles

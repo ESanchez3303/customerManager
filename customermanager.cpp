@@ -1,6 +1,7 @@
 #include "customermanager.h"
 #include "./ui_customermanager.h"
 #include <iostream>
+#include <QMessageBox>
 using namespace std;
 
 // Destructor
@@ -12,7 +13,7 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     ui->setupUi(this);
 
     // Setting up the file path for the customers
-    current_customer.setFilePath("./customers");
+    current_customer.setFilePath(filePath);
 
     // Connecting the buttons to functions
     connect(ui->MM_addCustomerButton, &QPushButton::clicked, this, &customerManager::MM_addCustomerClicked);
@@ -83,6 +84,18 @@ void customerManager::AC_savedCustomerButtonClicked(){
     bool validPhone = (phoneRegex.match(ui->AC_phoneInput->text()).hasMatch());
 
 
+    // If we can open the file, then make the name invalid
+    string fullPath = filePath + "/" + ui->AC_nameInput->text().toStdString() + ".txt";
+    ifstream testingNameFile(fullPath);
+    cout << fullPath << endl;
+    if(testingNameFile){
+        validName = false;
+        testingNameFile.close();
+        QMessageBox::critical(this, "Error", "Name is already used, please change.");
+    }else
+
+
+
     // Setting the colors if invalid and resetting if IS valid
     ui->AC_nameInput->setStyleSheet(validName ? normalStyle : errorStyle);
     ui->AC_phoneInput->setStyleSheet(validPhone ? normalStyle : errorStyle);
@@ -99,6 +112,17 @@ void customerManager::AC_savedCustomerButtonClicked(){
     cout << "Name: " << ui->AC_nameInput->text().toStdString() << endl;
     cout << "phone: " << ui->AC_phoneInput->text().toStdString() << endl;
 
+    // Setting up the customer data
+    current_customer.setData(ui->AC_nameInput->text().toStdString(),ui->AC_phoneInput->text().toStdString(), ui->AC_balanceInput->value());
+
+    // Saving the customer
+    current_customer.saveFile();
+
+    // Sending sucess message
+    QMessageBox::information(this,"Success","Added new customer!");
+
+    // Clearing the inputs
+    switchFrame(ui->AC_frame);
 }
 
 

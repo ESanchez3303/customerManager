@@ -23,14 +23,37 @@ public:
     customer() = default;
     void loadFromFile(const string file_name);
     void setFilePath(const string file_path);
+    bool saveFile();
 
-
+    void setData(string new_name, string new_phone, double new_balance){
+        name = new_name;phoneNumber = new_phone; balance = new_balance;}
 
 
 };
 
 
-void customer::setFilePath(const string file_path){
+inline bool customer::saveFile(){
+    string fullPath = filePath + "/" + name + ".txt";
+    cout << "Full file path:" << fullPath << endl;
+    ofstream file(fullPath);
+
+    if(!file)
+        return false;
+
+    file << phoneNumber << endl;
+    file << balance << endl;
+
+    // <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
+    for(int i = 0; i < transactions.size(); i++){
+        file << transactions[i] << endl;
+    }
+
+    file.close();
+    return true;
+}
+
+
+inline void customer::setFilePath(const string file_path){
     filePath = file_path;
 
     namespace fs = std::filesystem;
@@ -45,7 +68,7 @@ void customer::setFilePath(const string file_path){
 }
 
 
-void customer::loadFromFile(const string file_name) {
+inline void customer::loadFromFile(const string file_name) {
     name = file_name;
 
     // Combine filePath and file_name
@@ -53,7 +76,7 @@ void customer::loadFromFile(const string file_name) {
     if (!fullPath.empty() && fullPath.back() != '/' && fullPath.back() != '\\') {
         fullPath += '/';  // or use filesystem::path if using C++17
     }
-    fullPath += file_name;
+    fullPath += file_name + ".txt";
 
     ifstream file(fullPath);
     if (!file.is_open()) {
@@ -102,7 +125,6 @@ void customer::loadFromFile(const string file_name) {
  * "emanuel sanchez.txt"
  * ------------------------------------------------------------------
  * 2816858101
- * 3000.00
  * +200.00|07/07/2025|fixing a mistake of taking away 200
  * -200.00|07/07/2025|this here is a testing mistake
  * +3000.00|07/06/2025|
