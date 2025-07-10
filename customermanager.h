@@ -28,8 +28,8 @@ private:
 
 
 // Constants for styles
-    QString const errorStyle = "color:white;background:red;";
-    QString const normalStyle = "color:black;background:white;";
+    QString const errorStyle_textInput = "color:white;background:red;";
+    QString const normalStyle_textInput = "color:black;background:white;";
 
 
 // Frame Control

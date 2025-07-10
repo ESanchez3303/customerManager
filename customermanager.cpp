@@ -175,8 +175,8 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
     // Setting the colors if invalid and resetting if IS valid
-    ui->AC_nameInput->setStyleSheet(validName ? normalStyle : errorStyle);
-    ui->AC_phoneInput->setStyleSheet(validPhone ? normalStyle : errorStyle);
+    ui->AC_nameInput->setStyleSheet(validName ? normalStyle_textInput : errorStyle_textInput);
+    ui->AC_phoneInput->setStyleSheet(validPhone ? normalStyle_textInput : errorStyle_textInput);
 
 
     // Blocking if this is bad input
