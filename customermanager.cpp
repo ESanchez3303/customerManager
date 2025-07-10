@@ -87,12 +87,11 @@ void customerManager::AC_savedCustomerButtonClicked(){
     // If we can open the file, then make the name invalid
     string fullPath = filePath + "/" + ui->AC_nameInput->text().toStdString() + ".txt";
     ifstream testingNameFile(fullPath);
-    cout << fullPath << endl;
     if(testingNameFile){
         validName = false;
         testingNameFile.close();
         QMessageBox::critical(this, "Error", "Name is already used, please change.");
-    }else
+    }
 
 
 
@@ -108,9 +107,6 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
     // [ INFORMATION IS VALID FROM HERE FORTH ]
-
-    cout << "Name: " << ui->AC_nameInput->text().toStdString() << endl;
-    cout << "phone: " << ui->AC_phoneInput->text().toStdString() << endl;
 
     // Setting up the customer data
     current_customer.setData(ui->AC_nameInput->text().toStdString(),ui->AC_phoneInput->text().toStdString(), ui->AC_balanceInput->value());
