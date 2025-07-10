@@ -21,7 +21,7 @@ private:
 
 public:
     customer() = default;
-    void loadFromFile(const string file_name);
+    bool loadFromFile(const string file_name);
     void setFilePath(const string file_path);
     bool saveFile();
 
@@ -68,20 +68,20 @@ inline void customer::setFilePath(const string file_path){
 }
 
 
-inline void customer::loadFromFile(const string file_name) {
-    name = file_name;
+inline bool customer::loadFromFile(const string customerName) {
+    name = customerName;
 
     // Combine filePath and file_name
     string fullPath = filePath;
     if (!fullPath.empty() && fullPath.back() != '/' && fullPath.back() != '\\') {
         fullPath += '/';  // or use filesystem::path if using C++17
     }
-    fullPath += file_name + ".txt";
+    fullPath += customerName + ".txt";
 
     ifstream file(fullPath);
     if (!file.is_open()) {
         cout << "Error: Could not open file: " << fullPath << endl;
-        return;
+        return false;
     }
 
     string line;
@@ -111,6 +111,7 @@ inline void customer::loadFromFile(const string file_name) {
     }
 
     file.close();
+    return true;
 }
 
 

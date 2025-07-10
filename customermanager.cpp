@@ -24,6 +24,7 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
     connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
     connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
+    connect(ui->MM_openFileButton, &QPushButton::clicked, this, &customerManager::MM_openFileButtonClicked);
 
 
 
@@ -87,9 +88,8 @@ void customerManager::switchFrame(QFrame* targetFrame){
 
 // Main Menu Functions: ========================================================================================================================
 void customerManager::MM_addCustomerClicked()  { switchFrame(ui->AC_frame); }
+
 void customerManager::calculatorButtonClicked(){ switchFrame(ui->C_frame) ; }
-
-
 
 void customerManager::populateCustomerDisplay(){
     // Loading in the customers into the customerDispaly by only the names, no other information is loaded
@@ -98,17 +98,48 @@ void customerManager::populateCustomerDisplay(){
 
 
     try {
-        for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {
-            if (entry.is_regular_file()) {
-                QString fileName = QString::fromStdString(entry.path().filename().string());
-                ui->MM_customerDisplay->addItem(fileName);
+        for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {   // Looking through all of the files in the path
+            if (entry.is_regular_file()) {                                               // If the file is a text file
+                string fileName = entry.path().filename().string();                      // Grab the full name of the file
+                fileName = fileName.substr(0,fileName.length()-4);                       // Chop off the last 4 characters being ".txt"
+                ui->MM_customerDisplay->addItem(QString::fromStdString(fileName));       // Adding item to the display
             }
         }
     } catch (const std::exception& e) {
-        QMessageBox::critical(this, "ERORR", "Could not open a file");
+        QMessageBox::critical(this, "ERORR", "Could not open a file");                   // Catching when the file could not be opened
     }
 }
 
+void customerManager::MM_openFileButtonClicked(){
+    // Checking that there is only one file selected
+    if(ui->MM_customerDisplay->selectedItems().count() != 1){
+        QMessageBox::critical(this,"ERROR","Please choose a customer");
+        return;
+    }
+
+    // Attempting to open the file and throwing an error if it does nto open
+    string customerName = ui->MM_customerDisplay->currentItem()->text().toStdString();
+    string customerFullPath = filePath + "/" + customerName + ".txt";
+    ifstream customerFile(customerFullPath);
+
+    if(!customerFile){
+        QMessageBox::critical(this,"ERROR","Could not open file");
+        return;
+    }
+
+
+    // File was opened, load everything from the file name
+    if(!current_customer.loadFromFile(customerName)){
+        string errorMessage = "Could not open the customer: " + customerName;
+        QMessageBox::critical(this,"ERROR", QString::fromStdString(errorMessage));
+        return;
+    }
+
+    // Current customer was grabbed form the file and we now can present the new window
+    //switchFrame(ui->OC_frame);
+
+
+}
 
 
 // Adding Customer Functions ============================================================================================================

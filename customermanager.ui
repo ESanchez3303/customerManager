@@ -312,56 +312,6 @@
      </property>
      <item>
       <property name="text">
-       <string>Testin</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>some more</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>otro</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>otra</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>goose</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>dogs</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>sfdsfsdf</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>fsdfsdgaSDG</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>EMANUEL SANCHEZ</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>miguelina </string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
        <string>abraham</string>
       </property>
      </item>
@@ -372,7 +322,12 @@
      </item>
      <item>
       <property name="text">
-       <string>linda</string>
+       <string>dogs</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>EMANUEL SANCHEZ</string>
       </property>
      </item>
      <item>
@@ -382,12 +337,57 @@
      </item>
      <item>
       <property name="text">
-       <string>others</string>
+       <string>fsdfsdgaSDG</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>goose</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>linda</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>miguelina </string>
       </property>
      </item>
      <item>
       <property name="text">
        <string>one more</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>others</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>otra</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>otro</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>sfdsfsdf</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>some more</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Testin</string>
       </property>
      </item>
      <item>
@@ -1306,14 +1306,21 @@ background:rgb(148, 181, 190);
        <bool>false</bool>
       </property>
      </widget>
+     <zorder>AC_nameInput</zorder>
+     <zorder>AC_label_4</zorder>
+     <zorder>AC_label_5</zorder>
+     <zorder>AC_saveCustomerButton</zorder>
+     <zorder>AC_balanceInput</zorder>
+     <zorder>AC_phoneInput</zorder>
+     <zorder>AC_label_3</zorder>
     </widget>
     <zorder>AC_frame_2</zorder>
     <zorder>AC_label</zorder>
     <zorder>AC_backButton</zorder>
    </widget>
-   <zorder>AC_frame</zorder>
-   <zorder>MM_frame</zorder>
    <zorder>C_frame</zorder>
+   <zorder>MM_frame</zorder>
+   <zorder>AC_frame</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

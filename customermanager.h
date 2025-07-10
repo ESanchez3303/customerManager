@@ -39,6 +39,7 @@ private:
 // Main Menu Functions
     void MM_addCustomerClicked();
     void populateCustomerDisplay();
+    void MM_openFileButtonClicked();
 
 
 // Adding Customer Functions
