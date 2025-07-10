@@ -50,5 +50,6 @@ private:
 // Calculator Function
     void calculatorButtonClicked();
     void calculateButtonClicked();
+    void C_backButtonClicked();
 };
 #endif // CUSTOMERMANAGER_H

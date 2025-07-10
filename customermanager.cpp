@@ -23,6 +23,8 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->AC_saveCustomerButton, &QPushButton::clicked, this, &customerManager::AC_savedCustomerButtonClicked);
     connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
     connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
+    connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
+
 
 
 
@@ -84,7 +86,9 @@ void customerManager::switchFrame(QFrame* targetFrame){
 
 
 // Main Menu Functions: ========================================================================================================================
-void customerManager::MM_addCustomerClicked(){ switchFrame(ui->AC_frame); }
+void customerManager::MM_addCustomerClicked()  { switchFrame(ui->AC_frame); }
+void customerManager::calculatorButtonClicked(){ switchFrame(ui->C_frame) ; }
+
 
 
 void customerManager::populateCustomerDisplay(){
@@ -170,8 +174,10 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
 // Calculator Functions: ============================================================================================================
-void customerManager::calculatorButtonClicked(){
-    switchFrame(ui->C_frame);
+
+
+void customerManager::C_backButtonClicked(){
+    switchFrame(ui->MM_frame);
 }
 
 

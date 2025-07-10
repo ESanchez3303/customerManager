@@ -883,7 +883,7 @@ background:rgb(148, 181, 190);
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="C_backButton">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -1312,8 +1312,8 @@ background:rgb(148, 181, 190);
     <zorder>AC_backButton</zorder>
    </widget>
    <zorder>AC_frame</zorder>
-   <zorder>C_frame</zorder>
    <zorder>MM_frame</zorder>
+   <zorder>C_frame</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
