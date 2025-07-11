@@ -137,11 +137,11 @@ inline bool customer::loadFromFile(const string customerName) {
  * ------------------------------------------------------------------
  * <phone number>
  * <balance>
- * <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
- * <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
- * <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
+ * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
+ * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
+ * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
  * ...
- * <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
+ * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
  * ------------------------------------------------------------------
  *
  */

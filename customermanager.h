@@ -31,6 +31,8 @@ private:
     QString const errorStyle_textInput = "color:white;background:red;";
     QString const normalStyle_textInput = "color:black;background:white;";
 
+// Helper Functions
+    bool loadCustomerFromDisplay();
 
 // Frame Control
     void switchFrame(QFrame* targetFrame);
@@ -39,7 +41,8 @@ private:
 // Main Menu Functions
     void MM_addCustomerClicked();
     void populateCustomerDisplay();
-    void MM_openFileButtonClicked();
+    void MM_changeBalanceButtonClicked();
+    void MM_editCustomerButtonClicked();
 
 
 // Adding Customer Functions

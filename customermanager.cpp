@@ -24,7 +24,9 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
     connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
     connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
-    connect(ui->MM_openFileButton, &QPushButton::clicked, this, &customerManager::MM_openFileButtonClicked);
+    connect(ui->MM_changeBalanceButton, &QPushButton::clicked, this, &customerManager::MM_changeBalanceButtonClicked);
+    connect(ui->MM_editCustomerButton, &QPushButton::clicked, this, &customerManager::MM_editCustomerButtonClicked);
+
 
 
 
@@ -41,7 +43,34 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
 
 }
 
+// Helper Functions: ========================================================================================================================
+bool customerManager::loadCustomerFromDisplay(){
+    // Checking that there is only one file selected
+    if(ui->MM_customerDisplay->selectedItems().count() != 1){
+        QMessageBox::critical(this,"ERROR","Please choose a customer");
+        return false;
+    }
 
+    // Attempting to open the file and throwing an error if it does nto open
+    string customerName = ui->MM_customerDisplay->currentItem()->text().toStdString();
+    string customerFullPath = filePath + "/" + customerName + ".txt";
+    ifstream customerFile(customerFullPath);
+
+    if(!customerFile){
+        QMessageBox::critical(this,"ERROR","Could not open file");
+        return false;
+    }
+
+
+    // File was opened, load everything from the file name
+    if(!current_customer.loadFromFile(customerName)){
+        string errorMessage = "Could not open the customer: " + customerName;
+        QMessageBox::critical(this,"ERROR", QString::fromStdString(errorMessage));
+        return false;
+    }
+
+    return true;
+}
 
 
 
@@ -53,6 +82,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
     ui->MM_frame->hide();
     ui->AC_frame->hide();
     ui->C_frame->hide();
+    ui->CB_frame->hide();
 
 
     // Resetting the frame that we are going into
@@ -78,9 +108,14 @@ void customerManager::switchFrame(QFrame* targetFrame){
         calculateButtonClicked();
     }
 
+    else if(targetFrame == ui->CB_frame){
+
+    }
     // Show the frame
     targetFrame->show();
 }
+
+
 
 
 
@@ -110,33 +145,15 @@ void customerManager::populateCustomerDisplay(){
     }
 }
 
-void customerManager::MM_openFileButtonClicked(){
-    // Checking that there is only one file selected
-    if(ui->MM_customerDisplay->selectedItems().count() != 1){
-        QMessageBox::critical(this,"ERROR","Please choose a customer");
+void customerManager::MM_changeBalanceButtonClicked(){
+    // Loading customer from display, if it does not work, let it show error and return
+    if(!loadCustomerFromDisplay()){
         return;
     }
 
-    // Attempting to open the file and throwing an error if it does nto open
-    string customerName = ui->MM_customerDisplay->currentItem()->text().toStdString();
-    string customerFullPath = filePath + "/" + customerName + ".txt";
-    ifstream customerFile(customerFullPath);
+    // If customer was loaded, change to the CB_frame
+    switchFrame(ui->CB_frame);
 
-    if(!customerFile){
-        QMessageBox::critical(this,"ERROR","Could not open file");
-        return;
-    }
-
-
-    // File was opened, load everything from the file name
-    if(!current_customer.loadFromFile(customerName)){
-        string errorMessage = "Could not open the customer: " + customerName;
-        QMessageBox::critical(this,"ERROR", QString::fromStdString(errorMessage));
-        return;
-    }
-
-    // Current customer was grabbed form the file and we now can present the new window
-    //switchFrame(ui->OC_frame);
 
 
 }
