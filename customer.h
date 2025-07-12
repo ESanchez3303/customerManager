@@ -11,7 +11,7 @@ using namespace std;
 
 
 class customer{
-private:
+public:
     string name;
     string phoneNumber;
     double balance;
@@ -19,7 +19,6 @@ private:
     string filePath = "";
 
 
-public:
     customer() = default;
     bool loadFromFile(const string file_name);
     void setFilePath(const string file_path);
@@ -27,6 +26,13 @@ public:
 
     void setData(string new_name, string new_phone, double new_balance){
         name = new_name;phoneNumber = new_phone; balance = new_balance;}
+
+    void clear(){
+        name = "";
+        phoneNumber = "";
+        balance = 0;
+        transactions.clear();
+    }
 
 
 };
@@ -69,6 +75,7 @@ inline void customer::setFilePath(const string file_path){
 
 
 inline bool customer::loadFromFile(const string customerName) {
+
     name = customerName;
 
     // Combine filePath and file_name
@@ -137,9 +144,9 @@ inline bool customer::loadFromFile(const string customerName) {
  * ------------------------------------------------------------------
  * <phone number>
  * <balance>
- * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
- * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
- * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
+ * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>
+ * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>
+ * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>
  * ...
  * <transaction with format of = <+/-><amount><date><comment(leave blank if none)>
  * ------------------------------------------------------------------

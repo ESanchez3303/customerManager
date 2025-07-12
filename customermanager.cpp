@@ -26,9 +26,7 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
     connect(ui->MM_changeBalanceButton, &QPushButton::clicked, this, &customerManager::MM_changeBalanceButtonClicked);
     connect(ui->MM_editCustomerButton, &QPushButton::clicked, this, &customerManager::MM_editCustomerButtonClicked);
-
-
-
+    connect(ui->CB_backButton, &QPushButton::clicked, this, &customerManager::CB_backButtonClicked);
 
 
 
@@ -61,6 +59,9 @@ bool customerManager::loadCustomerFromDisplay(){
         return false;
     }
 
+
+    // Clearing the customer
+    current_customer.clear();
 
     // File was opened, load everything from the file name
     if(!current_customer.loadFromFile(customerName)){
@@ -109,7 +110,8 @@ void customerManager::switchFrame(QFrame* targetFrame){
     }
 
     else if(targetFrame == ui->CB_frame){
-
+        refreshTransactionDisplay();
+        ui->CB_name->setText(QString::fromStdString(current_customer.name));
     }
     // Show the frame
     targetFrame->show();
@@ -158,8 +160,18 @@ void customerManager::MM_changeBalanceButtonClicked(){
 
 }
 
+void customerManager::MM_editCustomerButtonClicked(){
+    // Loading customer from display, if it does not work, let it show error and return
+    if(!loadCustomerFromDisplay()){
+        return;
+    }
 
-// Adding Customer Functions ============================================================================================================
+    // If customer was loaded, change to the EC_frame
+    //switchFrame(ui->EC_frame);  <------------------------- waiting on creation of this frame
+}
+
+
+// Adding Customer Functions ====================================================================================================================
 void customerManager::AC_backButtonClicked(){ switchFrame(ui->MM_frame); }
 
 void customerManager::AC_markError(QLineEdit* target){
@@ -219,9 +231,66 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
 
+// Change Balance Functions: ========================================================================================================================
+void customerManager::CB_backButtonClicked(){switchFrame(ui->MM_frame);}
+
+void customerManager::refreshTransactionDisplay() {
+    // Clear the contents and reset rows
+    ui->CB_transactionsDisplay->clearContents();
+    ui->CB_transactionsDisplay->setRowCount(0);
+
+    // Helper to create a styled table item
+    auto makeItem = [](const std::string& value, bool bold = false, int fontSize = -1, QColor color = Qt::black) {
+        QTableWidgetItem* item = new QTableWidgetItem(QString::fromStdString(value));
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);  // Make uneditable
+        item->setTextAlignment(Qt::AlignCenter);              // Centered
+        item->setForeground(color);                           // Set text color
+
+        if (bold || fontSize > 0) {
+            QFont font = item->font();
+            if (bold) font.setBold(true);
+            if (fontSize > 0) font.setPointSize(fontSize);
+            item->setFont(font);
+        }
+
+        return item;
+    };
+
+    for (const std::string& transactionStr : current_customer.transactions) {
+        std::stringstream ss(transactionStr);
+        std::string date, type, amount, comment;
+
+        std::getline(ss, date, '|');
+        std::getline(ss, type, '|');
+        std::getline(ss, amount, '|');
+        std::getline(ss, comment, '|'); // May be empty
+
+        int currentRow = ui->CB_transactionsDisplay->rowCount();
+        ui->CB_transactionsDisplay->insertRow(currentRow);
+
+        // Decide color: green for +, red for -
+        QColor color = (type == "+") ? QColor(0, 160, 0) : QColor(200, 0, 0);
+
+        // Set cells
+        ui->CB_transactionsDisplay->setItem(currentRow, 0, makeItem(type, true, 14, color));
+        ui->CB_transactionsDisplay->setItem(currentRow, 1, makeItem(amount, false, 14, color));
+        ui->CB_transactionsDisplay->setItem(currentRow, 2, makeItem(comment.empty() ? "(No comment)" : comment));
+        ui->CB_transactionsDisplay->setVerticalHeaderItem(currentRow, makeItem(date));
+    }
+
+    // Lock layout and adjust column widths
+    ui->CB_transactionsDisplay->horizontalHeader()->setSectionsMovable(false);
+    ui->CB_transactionsDisplay->verticalHeader()->setSectionsMovable(false);
+    ui->CB_transactionsDisplay->setColumnWidth(0, 40);  // Narrow for +/−
+    ui->CB_transactionsDisplay->setColumnWidth(1, 100);
+    ui->CB_transactionsDisplay->setColumnWidth(2, 702);
+}
 
 
-// Calculator Functions: ============================================================================================================
+
+
+
+// Calculator Functions: ============================================================================================================================
 
 
 void customerManager::C_backButtonClicked(){

@@ -51,6 +51,11 @@ private:
     void AC_savedCustomerButtonClicked();
 
 
+// Change Balance Functions
+    void CB_backButtonClicked();
+    void refreshTransactionDisplay();
+
+
 // Calculator Function
     void calculatorButtonClicked();
     void calculateButtonClicked();
