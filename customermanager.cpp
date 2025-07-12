@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <string>
 #include <filesystem>
+#include <QDate>
 using namespace std;
 
 // Destructor
@@ -24,10 +25,15 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
     connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
     connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
-    connect(ui->MM_changeBalanceButton, &QPushButton::clicked, this, &customerManager::MM_changeBalanceButtonClicked);
-    connect(ui->MM_editCustomerButton, &QPushButton::clicked, this, &customerManager::MM_editCustomerButtonClicked);
-    connect(ui->CB_backButton, &QPushButton::clicked, this, &customerManager::CB_backButtonClicked);
-
+    connect(ui->MM_searchButton, &QPushButton::clicked, this, &customerManager::MM_searchButtonClicked);
+    connect(ui->MM_openCustomerButton, &QPushButton::clicked, this, &customerManager::MM_openCustomerButtonClicked);
+    connect(ui->OC_backButton, &QPushButton::clicked, this, &customerManager::OC_backButtonClicked);
+    connect(ui->OC_increaseBalanceButton, &QPushButton::clicked, this, &customerManager::OC_increaseButtonClicked);
+    connect(ui->OC_decreaseBalanceButton, &QPushButton::clicked, this, &customerManager::OC_descreaseButtonClicked);
+    connect(ui->OC_editButton, &QPushButton::clicked, this, &customerManager::OC_editButtonClicked);
+    connect(ui->OC_edittingCloseButton, &QPushButton::clicked, this, &customerManager::OC_edittingCancelButtonClicked);
+    connect(ui->OC_edittingCancelButton, &QPushButton::clicked, this, &customerManager::OC_edittingCancelButtonClicked);
+    connect(ui->OC_edittingSaveButton, &QPushButton::clicked, this, &customerManager::OC_edittingSaveButtonClicked);
 
 
     // Setting the tab orders
@@ -35,6 +41,20 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     setTabOrder(ui->AC_phoneInput, ui->AC_balanceInput);
     setTabOrder(ui->AC_balanceInput, ui->AC_saveCustomerButton);
 
+
+    // Setting application settings
+    QApplication::setStyle("Fusion");                               // Setting the style be portable
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // Removing the sizing gadget
+    ui->MM_customerDisplay->setStyleSheet(R"(
+        QListWidget {
+            color: black;
+            background: rgb(209, 209, 209);
+        }
+        QListWidget::item:selected {
+            color:white;
+            background:rgb(138, 195, 171)
+        }
+        )");
 
     // Switching to Main Menu Frame
     switchFrame(ui->MM_frame);
@@ -83,14 +103,13 @@ void customerManager::switchFrame(QFrame* targetFrame){
     ui->MM_frame->hide();
     ui->AC_frame->hide();
     ui->C_frame->hide();
-    ui->CB_frame->hide();
+    ui->OC_frame->hide();
 
 
     // Resetting the frame that we are going into
     if(targetFrame == ui->MM_frame){
-        ui->MM_customerDisplay->clear();
         ui->MM_searchBar->clear();
-        populateCustomerDisplay();
+        populateCustomerDisplay("");
     }
     else if(targetFrame == ui->AC_frame){
         // Resetting the values
@@ -109,9 +128,12 @@ void customerManager::switchFrame(QFrame* targetFrame){
         calculateButtonClicked();
     }
 
-    else if(targetFrame == ui->CB_frame){
+    else if(targetFrame == ui->OC_frame){
         refreshTransactionDisplay();
-        ui->CB_name->setText(QString::fromStdString(current_customer.name));
+        ui->OC_name->setText(QString::fromStdString(current_customer.name));
+        ui->OC_balance->setText(QString::number(current_customer.balance,'f',2));
+        ui->OC_phone->setText(QString::fromStdString(current_customer.phoneNumber));
+        ui->OC_edittingFrame->hide();
     }
     // Show the frame
     targetFrame->show();
@@ -128,46 +150,49 @@ void customerManager::MM_addCustomerClicked()  { switchFrame(ui->AC_frame); }
 
 void customerManager::calculatorButtonClicked(){ switchFrame(ui->C_frame) ; }
 
-void customerManager::populateCustomerDisplay(){
-    // Loading in the customers into the customerDispaly by only the names, no other information is loaded
+void customerManager::MM_searchButtonClicked(){
+    populateCustomerDisplay(ui->MM_searchBar->text());
+}
+
+void customerManager::populateCustomerDisplay(const QString& filter) {
+    // Clear the display
+    ui->MM_customerDisplay->clear();
+
     namespace fs = std::filesystem;
     QString customerPath = QString::fromStdString(filePath);
 
-
     try {
-        for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {   // Looking through all of the files in the path
-            if (entry.is_regular_file()) {                                               // If the file is a text file
-                string fileName = entry.path().filename().string();                      // Grab the full name of the file
-                fileName = fileName.substr(0,fileName.length()-4);                       // Chop off the last 4 characters being ".txt"
-                ui->MM_customerDisplay->addItem(QString::fromStdString(fileName));       // Adding item to the display
+        for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {
+            if (entry.is_regular_file()) {
+                std::string fullName = entry.path().filename().string();  // e.g., "JohnDoe.txt"
+                std::string nameOnly = fullName.substr(0, fullName.length() - 4); // Remove ".txt"
+
+                QString qName = QString::fromStdString(nameOnly);
+
+                // If filter is empty or qName contains the filter, add it
+                if (filter.isEmpty() || qName.contains(filter, Qt::CaseInsensitive)) {
+                    ui->MM_customerDisplay->addItem(qName);
+                }
             }
         }
     } catch (const std::exception& e) {
-        QMessageBox::critical(this, "ERORR", "Could not open a file");                   // Catching when the file could not be opened
+        QMessageBox::critical(this, "ERROR", "Could not open the folder to load customers.");
     }
 }
 
-void customerManager::MM_changeBalanceButtonClicked(){
+
+
+void customerManager::MM_openCustomerButtonClicked(){
     // Loading customer from display, if it does not work, let it show error and return
     if(!loadCustomerFromDisplay()){
         return;
     }
 
     // If customer was loaded, change to the CB_frame
-    switchFrame(ui->CB_frame);
+    switchFrame(ui->OC_frame);
 
 
 
-}
-
-void customerManager::MM_editCustomerButtonClicked(){
-    // Loading customer from display, if it does not work, let it show error and return
-    if(!loadCustomerFromDisplay()){
-        return;
-    }
-
-    // If customer was loaded, change to the EC_frame
-    //switchFrame(ui->EC_frame);  <------------------------- waiting on creation of this frame
 }
 
 
@@ -216,8 +241,11 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
     // [ INFORMATION IS VALID FROM HERE FORTH ]
 
-    // Setting up the customer data
+    // Setting up the customer data and adding the new balance transaction
     current_customer.setData(ui->AC_nameInput->text().toStdString(),ui->AC_phoneInput->text().toStdString(), ui->AC_balanceInput->value());
+    QString date_str = QDate::currentDate().toString("MM/dd/yyyy");
+    string newTransaction = date_str.toStdString() + "|+|" + QString::number(ui->AC_balanceInput->value(),'f',2).toStdString() + "|New customer balance";
+    current_customer.transactions.push_back(newTransaction);
 
     // Saving the customer
     current_customer.saveFile();
@@ -231,13 +259,13 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
 
-// Change Balance Functions: ========================================================================================================================
-void customerManager::CB_backButtonClicked(){switchFrame(ui->MM_frame);}
+// Open Customer Functions: ========================================================================================================================
+void customerManager::OC_backButtonClicked(){switchFrame(ui->MM_frame);}
 
 void customerManager::refreshTransactionDisplay() {
     // Clear the contents and reset rows
-    ui->CB_transactionsDisplay->clearContents();
-    ui->CB_transactionsDisplay->setRowCount(0);
+    ui->OC_transactionsDisplay->clearContents();
+    ui->OC_transactionsDisplay->setRowCount(0);
 
     // Helper to create a styled table item
     auto makeItem = [](const std::string& value, bool bold = false, int fontSize = -1, QColor color = Qt::black) {
@@ -265,30 +293,181 @@ void customerManager::refreshTransactionDisplay() {
         std::getline(ss, amount, '|');
         std::getline(ss, comment, '|'); // May be empty
 
-        int currentRow = ui->CB_transactionsDisplay->rowCount();
-        ui->CB_transactionsDisplay->insertRow(currentRow);
+        int currentRow = ui->OC_transactionsDisplay->rowCount();
+        ui->OC_transactionsDisplay->insertRow(currentRow);
 
         // Decide color: green for +, red for -
         QColor color = (type == "+") ? QColor(0, 160, 0) : QColor(200, 0, 0);
 
         // Set cells
-        ui->CB_transactionsDisplay->setItem(currentRow, 0, makeItem(type, true, 14, color));
-        ui->CB_transactionsDisplay->setItem(currentRow, 1, makeItem(amount, false, 14, color));
-        ui->CB_transactionsDisplay->setItem(currentRow, 2, makeItem(comment.empty() ? "(No comment)" : comment));
-        ui->CB_transactionsDisplay->setVerticalHeaderItem(currentRow, makeItem(date));
+        ui->OC_transactionsDisplay->setItem(currentRow, 0, makeItem(type, true, 14, color));
+        ui->OC_transactionsDisplay->setItem(currentRow, 1, makeItem(amount, false, 14, color));
+        ui->OC_transactionsDisplay->setItem(currentRow, 2, makeItem(comment.empty() ? "(No comment)" : comment));
+        ui->OC_transactionsDisplay->setVerticalHeaderItem(currentRow, makeItem(date));
     }
 
     // Lock layout and adjust column widths
-    ui->CB_transactionsDisplay->horizontalHeader()->setSectionsMovable(false);
-    ui->CB_transactionsDisplay->verticalHeader()->setSectionsMovable(false);
-    ui->CB_transactionsDisplay->setColumnWidth(0, 40);  // Narrow for +/−
-    ui->CB_transactionsDisplay->setColumnWidth(1, 100);
-    ui->CB_transactionsDisplay->setColumnWidth(2, 702);
+    ui->OC_transactionsDisplay->horizontalHeader()->setSectionsMovable(false);
+    ui->OC_transactionsDisplay->verticalHeader()->setSectionsMovable(false);
+    ui->OC_transactionsDisplay->setColumnWidth(0, 40);  // Narrow for +/−
+    ui->OC_transactionsDisplay->setColumnWidth(1, 100);
+    ui->OC_transactionsDisplay->setColumnWidth(2, 702);
 }
 
 
+void customerManager::OC_descreaseButtonClicked(){ OC_changeBalance("|-|"); }
+
+void customerManager::OC_increaseButtonClicked(){ OC_changeBalance("|+|"); }
+
+void customerManager::OC_changeBalance(QString type){
+    // Catching when user did not put in an amount
+    if(ui->OC_amountInput->value() <= 0){
+        QMessageBox::critical(this,"ERROR", "Please input an amount for the transaction.");
+        return;
+    }
+
+    if((current_customer.balance - ui->OC_amountInput->value()) <= 0){
+        QMessageBox::warning(this,"Negative Balance Warning", "This transaction will make the balance negative.");
+    }
+
+    // Confirming with user if this is what they wish to do
+    QString sendingMessage = QString::fromStdString(type.toStdString().substr(1,1)) + QString::number(ui->OC_amountInput->value(),'f',2);
+    sendingMessage = "Please confirm this action:\n" + sendingMessage;
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Confirm Transaction", sendingMessage,
+                                                     QMessageBox::Ok | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Cancel) {
+        // Clearing the inputs and returning if they regret it
+        ui->OC_amountInput->setValue(0);
+        ui->OC_commentInput->clear();
+        return;
+    }
 
 
+    // Creating new transaction string
+    QString date_str = QDate::currentDate().toString("MM/dd/yyyy");
+    QString comment = ui->OC_commentInput->toPlainText();
+    double amount = ui->OC_amountInput->value();
+    QString new_transaction = date_str + type +
+                            QString::number(amount,'f',2) + "|" +
+                            comment;
+
+    // Increasing/Decreasing the total balance of customer
+    if(type == "|+|")
+        current_customer.balance += amount;
+    else
+        current_customer.balance -= amount;
+
+
+    // Putting string at the beginning of the transaction list
+    current_customer.transactions.insert(current_customer.transactions.begin(), new_transaction.toStdString());
+
+    // Saving customer file in case user closes at any moment
+    current_customer.saveFile();
+
+    // Refreshing the transaction display to show new information
+    refreshTransactionDisplay();
+
+    // Clearing the inputs
+    ui->OC_amountInput->setValue(0);
+    ui->OC_commentInput->clear();
+
+    // Setting the new balance
+    ui->OC_balance->setText(QString::number(current_customer.balance,'f',2));
+}
+
+void customerManager::OC_editButtonClicked(){
+    ui->OC_edittingFrame->show();
+    ui->OC_edittingNameInput->setText(QString::fromStdString(current_customer.name));
+    ui->OC_edittingPhoneInput->setText(QString::fromStdString(current_customer.phoneNumber));
+}
+
+void customerManager::OC_edittingCancelButtonClicked(){
+    ui->OC_edittingFrame->hide();
+}
+
+void customerManager::OC_edittingSaveButtonClicked(){
+    // Checking if Name or Phone has changed
+    bool changedName = false;
+    bool changedPhone = false;
+
+    if(ui->OC_edittingNameInput->text() != QString::fromStdString(current_customer.name))
+        changedName = true;
+    if(ui->OC_edittingPhoneInput->text() != QString::fromStdString(current_customer.phoneNumber))
+        changedPhone = true;
+
+    // If changedName is still false AND changedPhone are still false -> just close the window
+    if((changedName == false) && (changedPhone == false)){
+        ui->OC_edittingFrame->hide();
+        return;
+    }
+
+
+
+    bool validName = true, validPhone = true;
+    if(changedName){
+        static QRegularExpression invalidChars(R"([\\\/:*?"<>|])");
+        validName = (!ui->OC_edittingNameInput->text().isEmpty() && !ui->OC_edittingNameInput->text().contains(invalidChars));
+
+        // If we can open the file, then make the name invalid
+        string fullPath = filePath + "/" + ui->OC_edittingNameInput->text().toStdString() + ".txt";
+        ifstream testingNameFile(fullPath);
+        if(testingNameFile){
+            validName = false;
+            testingNameFile.close();
+            QMessageBox::critical(this, "Error", "Name is already used, please change.");
+            return;
+        }
+    }
+
+
+
+    if(changedPhone){
+        static QRegularExpression phoneRegex(R"(^\+?\d{7,15}$)");
+        validPhone = (phoneRegex.match(ui->OC_edittingPhoneInput->text()).hasMatch());
+    }
+
+
+    // Setting the colors if invalid and resetting if IS valid
+    ui->OC_edittingNameInput->setStyleSheet(validName ? normalStyle_textInput : errorStyle_textInput);
+    ui->OC_edittingPhoneInput->setStyleSheet(validPhone ? normalStyle_textInput : errorStyle_textInput);
+
+
+    // Not continuing if the name or phone number inputs are invalid
+    if(!validName || !validPhone){
+        return;
+    }
+
+
+
+    // [ Saving the information since everything is valid from here forth ]
+
+    // If name changed, remove the previous file using the current name before changing
+    if(changedName){
+        string oldFilePath = filePath + "/" + current_customer.name + ".txt";
+        try {
+            std::filesystem::remove(oldFilePath);
+        } catch (const std::filesystem::filesystem_error& e) {
+            QMessageBox::critical(this, "ERROR", "Failed to remove old file: " + QString::fromStdString(e.what()));
+        }
+    }
+
+    // Saving to the object
+    current_customer.name = ui->OC_edittingNameInput->text().toStdString();
+    current_customer.phoneNumber = ui->OC_edittingPhoneInput->text().toStdString();
+
+
+
+    // Saving the file
+    current_customer.saveFile();
+
+    // Closing the window
+    ui->OC_edittingFrame->hide();
+
+    // Setting up the information in the top section
+    ui->OC_name->setText(QString::fromStdString(current_customer.name));
+    ui->OC_phone->setText(QString::fromStdString(current_customer.phoneNumber));
+}
 
 // Calculator Functions: ============================================================================================================================
 

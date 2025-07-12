@@ -40,9 +40,9 @@ private:
 
 // Main Menu Functions
     void MM_addCustomerClicked();
-    void populateCustomerDisplay();
-    void MM_changeBalanceButtonClicked();
-    void MM_editCustomerButtonClicked();
+    void populateCustomerDisplay(const QString& filter);
+    void MM_openCustomerButtonClicked();
+    void MM_searchButtonClicked();
 
 
 // Adding Customer Functions
@@ -51,9 +51,15 @@ private:
     void AC_savedCustomerButtonClicked();
 
 
-// Change Balance Functions
-    void CB_backButtonClicked();
+// Open Customer Functions:
     void refreshTransactionDisplay();
+    void OC_backButtonClicked();
+    void OC_changeBalance(QString type);
+    void OC_increaseButtonClicked();
+    void OC_descreaseButtonClicked();
+    void OC_editButtonClicked();
+    void OC_edittingCancelButtonClicked();
+    void OC_edittingSaveButtonClicked();
 
 
 // Calculator Function
