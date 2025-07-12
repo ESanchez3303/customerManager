@@ -12,9 +12,11 @@ using namespace std;
 
 class customer{
 public:
+
     string name;
     string phoneNumber;
     double balance;
+    string address = "";
     vector<string> transactions;
     string filePath = "";
 
@@ -24,8 +26,10 @@ public:
     void setFilePath(const string file_path);
     bool saveFile();
 
-    void setData(string new_name, string new_phone, double new_balance){
-        name = new_name;phoneNumber = new_phone; balance = new_balance;}
+    void setData(string new_name, string new_phone, double new_balance, string new_address){
+        name = new_name; phoneNumber = new_phone; balance = new_balance;
+        address = (new_address.empty() ? "<>" : new_address);
+    }
 
     void clear(){
         name = "";
@@ -34,13 +38,11 @@ public:
         transactions.clear();
     }
 
-
 };
 
 
 inline bool customer::saveFile(){
     string fullPath = filePath + "/" + name + ".txt";
-    cout << "Full file path:" << fullPath << endl;
     ofstream file(fullPath);
 
     if(!file)
@@ -48,6 +50,7 @@ inline bool customer::saveFile(){
 
     file << phoneNumber << endl;
     file << balance << endl;
+    file << address << endl;
 
     // <transaction with format of = <+/-><amount><data><comment(leave blank if none)>
     for(int i = 0; i < transactions.size(); i++){
@@ -109,6 +112,9 @@ inline bool customer::loadFromFile(const string customerName) {
                 balance = 0.0;
             }
             break;
+        case 2:
+            address = line;
+            break;
         default:
             transactions.push_back(line);
             break;
@@ -133,6 +139,8 @@ inline bool customer::loadFromFile(const string customerName) {
  * "emanuel sanchez.txt"
  * ------------------------------------------------------------------
  * 2816858101
+ * 3000
+ * 6211 osprey dr
  * +200.00|07/07/2025|fixing a mistake of taking away 200
  * -200.00|07/07/2025|this here is a testing mistake
  * +3000.00|07/06/2025|
@@ -144,6 +152,7 @@ inline bool customer::loadFromFile(const string customerName) {
  * ------------------------------------------------------------------
  * <phone number>
  * <balance>
+ * <address>
  * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>
  * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>
  * <transaction with format of = <+/->|<amount>|<date>|<comment(leave blank if none)>

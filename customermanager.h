@@ -3,6 +3,7 @@
 
 #include "customer.h"
 #include <QMainWindow>
+#include "balancegraph.h"
 #include <QFrame>
 #include <QLineEdit>
 
@@ -58,6 +59,10 @@ private:
 
 
 // Open Customer Functions:
+    BalanceGraph* graph = nullptr;
+    bool transactionsShowing = false;
+    QString hideTransactionText;
+    QString showTransactionText;
     QString enterBalanceMessage;
     QString negativeBalanceTitle;
     QString negativeBalanceMessage;
@@ -71,6 +76,7 @@ private:
     void OC_editButtonClicked();
     void OC_edittingCancelButtonClicked();
     void OC_edittingSaveButtonClicked();
+    void OC_pastTransactionsButtonClicked();
 
 
 // Calculator Function

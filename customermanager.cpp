@@ -5,6 +5,10 @@
 #include <string>
 #include <filesystem>
 #include <QDate>
+#include <QLayoutItem>
+#include <QVBoxLayout>
+
+
 using namespace std;
 
 // Destructor
@@ -34,15 +38,26 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->OC_edittingCloseButton, &QPushButton::clicked, this, &customerManager::OC_edittingCancelButtonClicked);
     connect(ui->OC_edittingCancelButton, &QPushButton::clicked, this, &customerManager::OC_edittingCancelButtonClicked);
     connect(ui->OC_edittingSaveButton, &QPushButton::clicked, this, &customerManager::OC_edittingSaveButtonClicked);
-
+    connect(ui->OC_pastTransactionsButton, &QPushButton::clicked, this, &customerManager::OC_pastTransactionsButtonClicked);
     connect(ui->MM_english, &QRadioButton::toggled, this, &customerManager::enlishLanguageToggled);
 
+
+    // Seting up the graph
+    graph = new BalanceGraph();
+    QVBoxLayout* layout = new QVBoxLayout(ui->OC_graphFrame);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(graph);
 
 
     // Setting the tab orders
     setTabOrder(ui->AC_nameInput, ui->AC_phoneInput);
     setTabOrder(ui->AC_phoneInput, ui->AC_balanceInput);
     setTabOrder(ui->AC_balanceInput, ui->AC_saveCustomerButton);
+    setTabOrder(ui->AC_addressInput, ui->AC_saveCustomerButton);
+    setTabOrder(ui->OC_edittingNameInput, ui->OC_edittingPhoneInput);
+    setTabOrder(ui->OC_edittingPhoneInput, ui->OC_edittingAddressInput);
+    setTabOrder(ui->OC_edittingAddressInput, ui->OC_edittingSaveButton);
+    setTabOrder(ui->OC_edittingSaveButton, ui->OC_edittingCancelButton);
 
 
     // Setting application settings
@@ -124,8 +139,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
         ui->AC_balanceInput->setValue(0);
         // Resetting the colors
         ui->AC_nameInput->setStyleSheet("color:black;background:white;");
-        ui->AC_nameInput->setStyleSheet("color:black;background:white;");
-        ui->AC_nameInput->setStyleSheet("color:black;background:white;");
+        ui->AC_phoneInput->setStyleSheet("color:black;background:white;");
     }
 
     else if(targetFrame == ui->C_frame){
@@ -135,11 +149,29 @@ void customerManager::switchFrame(QFrame* targetFrame){
     }
 
     else if(targetFrame == ui->OC_frame){
-        refreshTransactionDisplay();
+        // Setting text displays
         ui->OC_name->setText(QString::fromStdString(current_customer.name));
         ui->OC_balance->setText(QString::number(current_customer.balance,'f',2));
         ui->OC_phone->setText(QString::fromStdString(current_customer.phoneNumber));
+        ui->OC_address->setText(QString::fromStdString(current_customer.address));
+
+        // Moving and hiding extra windows inside
+        ui->OC_edittingFrame->move(130,150);
         ui->OC_edittingFrame->hide();
+        ui->OC_transactionsDisplay->move(39,162);
+        ui->OC_transactionsDisplay->hide();
+
+        // Setting transaction button
+        ui->OC_pastTransactionsButton->setText(showTransactionText);
+        ui->OC_pastTransactionsButton->setStyleSheet("color:white; background: rgb(99, 140, 122)");
+        transactionsShowing = false;
+
+        // Setting up the graph
+        graph->setTransactions(current_customer.transactions);
+
+        // Refreshing transaction window
+        refreshTransactionDisplay();
+
     }
     // Show the frame
     targetFrame->show();
@@ -187,18 +219,13 @@ void customerManager::populateCustomerDisplay(const QString& filter) {
 }
 
 void customerManager::MM_openCustomerButtonClicked(){
-    // Loading customer from display, if it does not work, let it show error and return
     if(!loadCustomerFromDisplay()){
         return;
     }
 
-    // If customer was loaded, change to the CB_frame
     switchFrame(ui->OC_frame);
 
-
-
 }
-
 
 void customerManager::enlishLanguageToggled(){
     // Changing lanauge to English
@@ -226,6 +253,8 @@ void customerManager::enlishLanguageToggled(){
         ui->AC_phoneInput->setPlaceholderText("Enter Phone Number.");
         ui->AC_label_4->setText("Balance:");
         ui->AC_saveCustomerButton->setText("Save Customer");
+        ui->AC_label_6->setText("Address:");
+        ui->AC_addressInput->setPlaceholderText("Enter Address");
         nameIsAlreadyUsedMessage = "Name is already used, please change.";
         sucessTitle = "Successfully Added";
         successAddedMessage = "Customer has been added";
@@ -238,11 +267,15 @@ void customerManager::enlishLanguageToggled(){
         ui->OC_label_7->setText("Phone:");
         ui->OC_edittingSaveButton->setText("Save");
         ui->OC_edittingCancelButton->setText("Cancel");
+        ui->OC_label_8->setText("Addres:");
+        hideTransactionText = "X";
+        showTransactionText = "Past Transactions";
         enterBalanceMessage = "Please input an amount for the transaction.";
         negativeBalanceTitle = "Negative Balance Warning";
         negativeBalanceMessage = "This transaction will make the balance negative.";
         confirmTransactionTitle = "Confirm Transaction";
         confirmTransactionMessage = "Please confirm this action";
+
 
     }
     // Changing langauge to spanish
@@ -269,6 +302,8 @@ void customerManager::enlishLanguageToggled(){
         ui->AC_phoneInput->setPlaceholderText("Ingrese el Número de Teléfono.");
         ui->AC_label_4->setText("Saldo:");
         ui->AC_saveCustomerButton->setText("Guardar Cliente");
+        ui->AC_label_6->setText("Ubicacion:");
+        ui->AC_addressInput->setPlaceholderText("Ingrese la ubicacion");
         nameIsAlreadyUsedMessage = "El nombre ya está en uso, por favor cámbielo.";
         sucessTitle = "Agregado Exitosamente";
         successAddedMessage = "El cliente ha sido agregado";
@@ -281,6 +316,9 @@ void customerManager::enlishLanguageToggled(){
         ui->OC_label_7->setText("Teléfono:");
         ui->OC_edittingSaveButton->setText("Guardar");
         ui->OC_edittingCancelButton->setText("Cancelar");
+        ui->OC_label_8->setText("Ubicacion:");
+        hideTransactionText = "X";
+        showTransactionText = "Transacciones Pasadas";
         enterBalanceMessage = "Por favor ingrese una cantidad para la transacción.";
         negativeBalanceTitle = "Advertencia de Saldo Negativo";
         negativeBalanceMessage = "Esta transacción hará que el saldo sea negativo.";
@@ -335,7 +373,9 @@ void customerManager::AC_savedCustomerButtonClicked(){
     // [ INFORMATION IS VALID FROM HERE FORTH ]
 
     // Setting up the customer data and adding the new balance transaction
-    current_customer.setData(ui->AC_nameInput->text().toStdString(),ui->AC_phoneInput->text().toStdString(), ui->AC_balanceInput->value());
+    current_customer.setData(ui->AC_nameInput->text().toStdString(),ui->AC_phoneInput->text().toStdString(), ui->AC_balanceInput->value(), ui->AC_addressInput->text().toStdString());
+
+    // Adding first transaction
     QString date_str = QDate::currentDate().toString("MM/dd/yyyy");
     string newTransaction = date_str.toStdString() + "|+|" + QString::number(ui->AC_balanceInput->value(),'f',2).toStdString() + "|New customer balance";
     current_customer.transactions.push_back(newTransaction);
@@ -419,8 +459,11 @@ void customerManager::OC_changeBalance(QString type){
         return;
     }
 
-    if((current_customer.balance - ui->OC_amountInput->value()) <= 0){
-        QMessageBox::warning(this, negativeBalanceTitle, negativeBalanceMessage);
+    if(type == "|-|"){
+        if((current_customer.balance - ui->OC_amountInput->value()) <= 0){
+            QMessageBox::warning(this, negativeBalanceTitle, negativeBalanceMessage);
+            return;
+        }
     }
 
     // Confirming with user if this is what they wish to do
@@ -467,12 +510,18 @@ void customerManager::OC_changeBalance(QString type){
 
     // Setting the new balance
     ui->OC_balance->setText(QString::number(current_customer.balance,'f',2));
+
+    // Refreshing the graph
+    graph->setTransactions(current_customer.transactions);
+
 }
 
 void customerManager::OC_editButtonClicked(){
+    ui->OC_edittingFrame->raise();
     ui->OC_edittingFrame->show();
     ui->OC_edittingNameInput->setText(QString::fromStdString(current_customer.name));
     ui->OC_edittingPhoneInput->setText(QString::fromStdString(current_customer.phoneNumber));
+    ui->OC_edittingAddressInput->setText(QString::fromStdString(current_customer.address));
 }
 
 void customerManager::OC_edittingCancelButtonClicked(){
@@ -483,17 +532,21 @@ void customerManager::OC_edittingSaveButtonClicked(){
     // Checking if Name or Phone has changed
     bool changedName = false;
     bool changedPhone = false;
+    bool changedAddress = false;
 
     if(ui->OC_edittingNameInput->text() != QString::fromStdString(current_customer.name))
         changedName = true;
     if(ui->OC_edittingPhoneInput->text() != QString::fromStdString(current_customer.phoneNumber))
         changedPhone = true;
+    if(ui->OC_edittingAddressInput->text() != QString::fromStdString(current_customer.address))
+        changedAddress = true;
 
     // If changedName is still false AND changedPhone are still false -> just close the window
-    if((changedName == false) && (changedPhone == false)){
+    if((changedName == false) && (changedPhone == false) && (changedAddress == false)){
         ui->OC_edittingFrame->hide();
         return;
     }
+
 
 
 
@@ -545,10 +598,11 @@ void customerManager::OC_edittingSaveButtonClicked(){
         }
     }
 
-    // Saving to the object
-    current_customer.name = ui->OC_edittingNameInput->text().toStdString();
-    current_customer.phoneNumber = ui->OC_edittingPhoneInput->text().toStdString();
-
+    // Setting the object with new information and the OLD balance since we aren't changing that
+    string newName = ui->OC_edittingNameInput->text().toStdString();
+    string newPhone = ui->OC_edittingPhoneInput->text().toStdString();
+    string newAddress = ui->OC_edittingAddressInput->text().toStdString();
+    current_customer.setData(newName,newPhone,current_customer.balance,newAddress);
 
 
     // Saving the file
@@ -557,9 +611,31 @@ void customerManager::OC_edittingSaveButtonClicked(){
     // Closing the window
     ui->OC_edittingFrame->hide();
 
-    // Setting up the information in the top section
+    // Resetting up the information in the top section
     ui->OC_name->setText(QString::fromStdString(current_customer.name));
     ui->OC_phone->setText(QString::fromStdString(current_customer.phoneNumber));
+    ui->OC_address->setText(QString::fromStdString(current_customer.address));
+}
+
+void customerManager::OC_pastTransactionsButtonClicked(){
+    // Catching if the edit customer window is open
+    if(ui->OC_edittingFrame->isVisible())
+        return;
+
+    transactionsShowing = !transactionsShowing;
+    // Show the transactions window
+    if(transactionsShowing){
+        ui->OC_pastTransactionsButton->setStyleSheet("color:white; background: rgb(250, 0, 0)");
+        ui->OC_pastTransactionsButton->setText(hideTransactionText);
+        ui->OC_transactionsDisplay->raise();
+        ui->OC_transactionsDisplay->show();
+    }
+    // Hide the transactions window
+    else{
+        ui->OC_pastTransactionsButton->setText(showTransactionText);
+        ui->OC_pastTransactionsButton->setStyleSheet("color:white; background: rgb(99, 140, 122)");
+        ui->OC_transactionsDisplay->hide();
+    }
 }
 
 // Calculator Functions: ============================================================================================================================
