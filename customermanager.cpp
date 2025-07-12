@@ -35,6 +35,9 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->OC_edittingCancelButton, &QPushButton::clicked, this, &customerManager::OC_edittingCancelButtonClicked);
     connect(ui->OC_edittingSaveButton, &QPushButton::clicked, this, &customerManager::OC_edittingSaveButtonClicked);
 
+    connect(ui->MM_english, &QRadioButton::toggled, this, &customerManager::enlishLanguageToggled);
+
+
 
     // Setting the tab orders
     setTabOrder(ui->AC_nameInput, ui->AC_phoneInput);
@@ -56,6 +59,9 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
         }
         )");
 
+    // Changing language depending on the toggle of the english trans. button
+    enlishLanguageToggled();
+
     // Switching to Main Menu Frame
     switchFrame(ui->MM_frame);
 
@@ -65,7 +71,7 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
 bool customerManager::loadCustomerFromDisplay(){
     // Checking that there is only one file selected
     if(ui->MM_customerDisplay->selectedItems().count() != 1){
-        QMessageBox::critical(this,"ERROR","Please choose a customer");
+        QMessageBox::critical(this, errorTitle , noCustomerChosenMessage);
         return false;
     }
 
@@ -75,7 +81,7 @@ bool customerManager::loadCustomerFromDisplay(){
     ifstream customerFile(customerFullPath);
 
     if(!customerFile){
-        QMessageBox::critical(this,"ERROR","Could not open file");
+        QMessageBox::critical(this,errorTitle ,"Could not open file");
         return false;
     }
 
@@ -180,8 +186,6 @@ void customerManager::populateCustomerDisplay(const QString& filter) {
     }
 }
 
-
-
 void customerManager::MM_openCustomerButtonClicked(){
     // Loading customer from display, if it does not work, let it show error and return
     if(!loadCustomerFromDisplay()){
@@ -196,6 +200,96 @@ void customerManager::MM_openCustomerButtonClicked(){
 }
 
 
+void customerManager::enlishLanguageToggled(){
+    // Changing lanauge to English
+    if(ui->MM_english->isChecked()){
+        // Main Menu:
+        ui->MM_label->setText("Customer Search");
+        ui->MM_searchBar->setPlaceholderText("Enter Name To Search");
+        ui->MM_searchButton->setText("Search");
+        ui->MM_openCustomerButton->setText("Open Customer");
+        errorTitle = "ERORR";
+        noCustomerChosenMessage = "Please choose a customer";
+
+
+        // Price Calculator:
+        ui->C_label->setText("Price Calculator");
+        ui->C_label_2->setText("/ Gram");
+        ui->C_label_3->setText("Gram");
+        ui->C_calculateButton->setText("Calculate");
+
+        // Add Customer:
+        ui->AC_label->setText("Add Customer");
+        ui->AC_label_5->setText("Name:");
+        ui->AC_nameInput->setPlaceholderText("Enter Name.");
+        ui->AC_label_3->setText("Phone Number:");
+        ui->AC_phoneInput->setPlaceholderText("Enter Phone Number.");
+        ui->AC_label_4->setText("Balance:");
+        ui->AC_saveCustomerButton->setText("Save Customer");
+        nameIsAlreadyUsedMessage = "Name is already used, please change.";
+        sucessTitle = "Successfully Added";
+        successAddedMessage = "Customer has been added";
+
+        // Open Customer:
+        ui->OC_editButton->setText("Edit");
+        ui->OC_label_3->setText("Balance:");
+        ui->OC_label_5->setText("Edit Customer");
+        ui->OC_label_6->setText("Name:");
+        ui->OC_label_7->setText("Phone:");
+        ui->OC_edittingSaveButton->setText("Save");
+        ui->OC_edittingCancelButton->setText("Cancel");
+        enterBalanceMessage = "Please input an amount for the transaction.";
+        negativeBalanceTitle = "Negative Balance Warning";
+        negativeBalanceMessage = "This transaction will make the balance negative.";
+        confirmTransactionTitle = "Confirm Transaction";
+        confirmTransactionMessage = "Please confirm this action";
+
+    }
+    // Changing langauge to spanish
+    else{
+        // Main Menu:
+        ui->MM_label->setText("Búsqueda de Cliente");
+        ui->MM_searchBar->setPlaceholderText("Ingrese el Nombre para Buscar");
+        ui->MM_searchButton->setText("Buscar");
+        ui->MM_openCustomerButton->setText("Abrir Cliente");
+        errorTitle = "Fallo";
+        noCustomerChosenMessage = "Por favor seleccione un cliente";
+
+        // Price Calculator:
+        ui->C_label->setText("Calculadora de Precio");
+        ui->C_label_2->setText("/ Gramo");
+        ui->C_label_3->setText("Gramos");
+        ui->C_calculateButton->setText("Calcular");
+
+        // Add Customer:
+        ui->AC_label->setText("Agregar Cliente");
+        ui->AC_label_5->setText("Nombre:");
+        ui->AC_nameInput->setPlaceholderText("Ingrese el Nombre.");
+        ui->AC_label_3->setText("Teléfono:");
+        ui->AC_phoneInput->setPlaceholderText("Ingrese el Número de Teléfono.");
+        ui->AC_label_4->setText("Saldo:");
+        ui->AC_saveCustomerButton->setText("Guardar Cliente");
+        nameIsAlreadyUsedMessage = "El nombre ya está en uso, por favor cámbielo.";
+        sucessTitle = "Agregado Exitosamente";
+        successAddedMessage = "El cliente ha sido agregado";
+
+        // Open Customer:
+        ui->OC_editButton->setText("Editar");
+        ui->OC_label_3->setText("Saldo:");
+        ui->OC_label_5->setText("Editar Cliente");
+        ui->OC_label_6->setText("Nombre:");
+        ui->OC_label_7->setText("Teléfono:");
+        ui->OC_edittingSaveButton->setText("Guardar");
+        ui->OC_edittingCancelButton->setText("Cancelar");
+        enterBalanceMessage = "Por favor ingrese una cantidad para la transacción.";
+        negativeBalanceTitle = "Advertencia de Saldo Negativo";
+        negativeBalanceMessage = "Esta transacción hará que el saldo sea negativo.";
+        confirmTransactionTitle = "Confirmar Transacción";
+        confirmTransactionMessage = "Por favor confirme esta acción";
+    }
+}
+
+
 // Adding Customer Functions ====================================================================================================================
 void customerManager::AC_backButtonClicked(){ switchFrame(ui->MM_frame); }
 
@@ -206,7 +300,6 @@ void customerManager::AC_markError(QLineEdit* target){
     // Setting the error input signal
     target->setStyleSheet("color:white;background:red;");
 }
-
 
 void customerManager::AC_savedCustomerButtonClicked(){
 
@@ -223,7 +316,7 @@ void customerManager::AC_savedCustomerButtonClicked(){
     if(testingNameFile){
         validName = false;
         testingNameFile.close();
-        QMessageBox::critical(this, "Error", "Name is already used, please change.");
+        QMessageBox::critical(this, errorTitle, nameIsAlreadyUsedMessage);
     }
 
 
@@ -251,7 +344,7 @@ void customerManager::AC_savedCustomerButtonClicked(){
     current_customer.saveFile();
 
     // Sending sucess message
-    QMessageBox::information(this,"Success","Added new customer!");
+    QMessageBox::information(this, sucessTitle, successAddedMessage);
 
     // Clearing the inputs
     switchFrame(ui->AC_frame);
@@ -322,18 +415,18 @@ void customerManager::OC_increaseButtonClicked(){ OC_changeBalance("|+|"); }
 void customerManager::OC_changeBalance(QString type){
     // Catching when user did not put in an amount
     if(ui->OC_amountInput->value() <= 0){
-        QMessageBox::critical(this,"ERROR", "Please input an amount for the transaction.");
+        QMessageBox::critical(this, errorTitle, enterBalanceMessage);
         return;
     }
 
     if((current_customer.balance - ui->OC_amountInput->value()) <= 0){
-        QMessageBox::warning(this,"Negative Balance Warning", "This transaction will make the balance negative.");
+        QMessageBox::warning(this, negativeBalanceTitle, negativeBalanceMessage);
     }
 
     // Confirming with user if this is what they wish to do
     QString sendingMessage = QString::fromStdString(type.toStdString().substr(1,1)) + QString::number(ui->OC_amountInput->value(),'f',2);
-    sendingMessage = "Please confirm this action:\n" + sendingMessage;
-    QMessageBox::StandardButton reply = QMessageBox::question(this, "Confirm Transaction", sendingMessage,
+    sendingMessage = confirmTransactionMessage + ":\n" + sendingMessage;
+    QMessageBox::StandardButton reply = QMessageBox::question(this, confirmTransactionTitle, sendingMessage,
                                                      QMessageBox::Ok | QMessageBox::Cancel);
 
     if (reply == QMessageBox::Cancel) {
@@ -415,7 +508,7 @@ void customerManager::OC_edittingSaveButtonClicked(){
         if(testingNameFile){
             validName = false;
             testingNameFile.close();
-            QMessageBox::critical(this, "Error", "Name is already used, please change.");
+            QMessageBox::critical(this, errorTitle, nameIsAlreadyUsedMessage);
             return;
         }
     }
@@ -448,7 +541,7 @@ void customerManager::OC_edittingSaveButtonClicked(){
         try {
             std::filesystem::remove(oldFilePath);
         } catch (const std::filesystem::filesystem_error& e) {
-            QMessageBox::critical(this, "ERROR", "Failed to remove old file: " + QString::fromStdString(e.what()));
+            QMessageBox::critical(this, errorTitle, "Failed to remove old file: " + QString::fromStdString(e.what()));
         }
     }
 

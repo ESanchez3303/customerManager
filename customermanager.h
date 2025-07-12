@@ -32,6 +32,8 @@ private:
     QString const normalStyle_textInput = "color:black;background:white;";
 
 // Helper Functions
+    QString errorTitle;
+    QString noCustomerChosenMessage;
     bool loadCustomerFromDisplay();
 
 // Frame Control
@@ -43,15 +45,24 @@ private:
     void populateCustomerDisplay(const QString& filter);
     void MM_openCustomerButtonClicked();
     void MM_searchButtonClicked();
+    void enlishLanguageToggled();
 
 
 // Adding Customer Functions
+    QString nameIsAlreadyUsedMessage;
+    QString sucessTitle;
+    QString successAddedMessage;
     void AC_backButtonClicked();
     void AC_markError(QLineEdit* target);
     void AC_savedCustomerButtonClicked();
 
 
 // Open Customer Functions:
+    QString enterBalanceMessage;
+    QString negativeBalanceTitle;
+    QString negativeBalanceMessage;
+    QString confirmTransactionTitle;
+    QString confirmTransactionMessage;
     void refreshTransactionDisplay();
     void OC_backButtonClicked();
     void OC_changeBalance(QString type);
