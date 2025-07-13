@@ -26,9 +26,8 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->MM_addCustomerButton, &QPushButton::clicked, this, &customerManager::MM_addCustomerClicked);
     connect(ui->AC_backButton, &QPushButton::clicked, this, &customerManager::AC_backButtonClicked);
     connect(ui->AC_saveCustomerButton, &QPushButton::clicked, this, &customerManager::AC_savedCustomerButtonClicked);
-    connect(ui->C_calculateButton, &QPushButton::clicked, this, &customerManager::calculateButtonClicked);
-    connect(ui->MM_calculatorButton, &QPushButton::clicked, this, &customerManager::calculatorButtonClicked);
-    connect(ui->C_backButton, &QPushButton::clicked, this, &customerManager::C_backButtonClicked);
+    connect(ui->MM_statsButton, &QPushButton::clicked, this, &customerManager::MM_statsButtonClicked);
+    connect(ui->S_backButton, &QPushButton::clicked, this, &customerManager::S_backButtonClicked);
     connect(ui->MM_searchButton, &QPushButton::clicked, this, &customerManager::MM_searchButtonClicked);
     connect(ui->MM_openCustomerButton, &QPushButton::clicked, this, &customerManager::MM_openCustomerButtonClicked);
     connect(ui->OC_backButton, &QPushButton::clicked, this, &customerManager::OC_backButtonClicked);
@@ -123,7 +122,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
     // Hiding all frames
     ui->MM_frame->hide();
     ui->AC_frame->hide();
-    ui->C_frame->hide();
+    ui->S_frame->hide();
     ui->OC_frame->hide();
 
 
@@ -132,6 +131,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
         ui->MM_searchBar->clear();
         populateCustomerDisplay("");
     }
+
     else if(targetFrame == ui->AC_frame){
         current_customer.clear();
         // Resetting the values
@@ -144,10 +144,8 @@ void customerManager::switchFrame(QFrame* targetFrame){
         ui->AC_phoneInput->setStyleSheet("color:black;background:white;");
     }
 
-    else if(targetFrame == ui->C_frame){
-        ui->C_weightInput->setValue(0);
-        ui->C_priceInput->setValue(0);
-        calculateButtonClicked();
+    else if(targetFrame == ui->S_frame){
+        setUpAllStats();
     }
 
     else if(targetFrame == ui->OC_frame){
@@ -188,7 +186,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
 // Main Menu Functions: ========================================================================================================================
 void customerManager::MM_addCustomerClicked()  { switchFrame(ui->AC_frame); }
 
-void customerManager::calculatorButtonClicked(){ switchFrame(ui->C_frame) ; }
+void customerManager::MM_statsButtonClicked(){ switchFrame(ui->S_frame) ; }
 
 void customerManager::MM_searchButtonClicked(){
     populateCustomerDisplay(ui->MM_searchBar->text());
@@ -241,12 +239,6 @@ void customerManager::enlishLanguageToggled(){
         noCustomerChosenMessage = "Please choose a customer";
 
 
-        // Price Calculator:
-        ui->C_label->setText("Price Calculator");
-        ui->C_label_2->setText("/ Gram");
-        ui->C_label_3->setText("Gram");
-        ui->C_calculateButton->setText("Calculate");
-
         // Add Customer:
         ui->AC_label->setText("Add Customer");
         ui->AC_label_5->setText("Name:");
@@ -289,12 +281,6 @@ void customerManager::enlishLanguageToggled(){
         ui->MM_openCustomerButton->setText("Abrir Cliente");
         errorTitle = "Fallo";
         noCustomerChosenMessage = "Por favor seleccione un cliente";
-
-        // Price Calculator:
-        ui->C_label->setText("Calculadora de Precio");
-        ui->C_label_2->setText("/ Gramo");
-        ui->C_label_3->setText("Gramos");
-        ui->C_calculateButton->setText("Calcular");
 
         // Add Customer:
         ui->AC_label->setText("Agregar Cliente");
@@ -640,20 +626,106 @@ void customerManager::OC_pastTransactionsButtonClicked(){
     }
 }
 
-// Calculator Functions: ============================================================================================================================
+// Statistics Functions: ============================================================================================================================
 
 
-void customerManager::C_backButtonClicked(){
+void customerManager::S_backButtonClicked(){
     switchFrame(ui->MM_frame);
 }
 
+void customerManager::setUpAllStats() {
+    double runningTotalOwed = 0;
+    double runningTotalGained = 0;
+
+    std::vector<std::pair<std::string, double>> customerBalances;
+
+    namespace fs = std::filesystem;
+    for (const auto& entry : fs::directory_iterator(filePath)) {
+        if (entry.is_regular_file()) {
+            std::string fullName = entry.path().filename().string();
+            fullName = fullName.substr(0, fullName.length() - 4);  // remove ".txt"
+
+            std::ifstream file(entry.path());
+            std::string line;
+
+            // Skip the phone number
+            std::getline(file, line);
+
+            // Read the second line for the current balance
+            if (std::getline(file, line)) {
+                try {
+                    double balance = std::stod(line);
+                    runningTotalOwed += balance;
+
+                    // Store name and balance
+                    customerBalances.push_back({ fullName, balance });
+
+                } catch (const std::invalid_argument&) {
+                    QString errorMessage = "One of the files is corrupted. Please check the file named: " + QString::fromStdString(entry.path().filename().string());
+                    QMessageBox::critical(this, "ERROR", errorMessage);
+                    switchFrame(ui->MM_frame);
+                    return;
+                }
+            }
+
+            // Skip address line
+            std::getline(file, line);
+            double lastValue;
+
+            while (std::getline(file, line)) {
+                if (line.empty()) continue;
+                line = line.substr(line.find("|") + 1);
+                if (line[1] == '-') continue;  // skip negatives
+                line = line.substr(2);
+                line = line.substr(0, line.find("|"));
+
+                try {
+                    double balance = std::stod(line);
+                    runningTotalGained += balance;
+                    lastValue = balance;
+                    if (balance == 380)
+                        std::cout << entry.path().filename().string() << std::endl;
+                } catch (const std::invalid_argument&) {
+                    QString errorMessage = "One of the files is corrupted. Please check the file named: " + QString::fromStdString(entry.path().filename().string());
+                    QMessageBox::critical(this, "ERROR", errorMessage);
+                    switchFrame(ui->MM_frame);
+                    return;
+                }
+            }
+
+            runningTotalGained -= lastValue;
+            file.close();
+        }
+    }
+
+    // Sorting the customer balances
+    std::sort(customerBalances.begin(), customerBalances.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+
+    // Display totals
+    ui->S_totalOwed->setText(QString::number(runningTotalOwed, 'f', 2));
+    ui->S_totalGained->setText(QString::number(runningTotalGained, 'f', 2));
 
 
-void customerManager::calculateButtonClicked(){
-    // Multiplying and showing the results in the output box
-    QString product = QString::number((ui->C_priceInput->value() * ui->C_weightInput->value()), 'f', 2);
-    ui->C_output->setText(product);
+    // Displaying the most owed list
+    ui->S_owedMostList->clear();
+    int maxDollarWidth = 0;
+    if (!customerBalances.empty() && customerBalances.front().second > 0) {
+        QString largestAmount = QString("$%1").arg(customerBalances.front().second, 0, 'f', 2);
+        maxDollarWidth = largestAmount.length();
+    }
+
+    for (const auto& [name, balance] : customerBalances) {
+        if (balance > 0) {
+            QString amountStr = QString("$%1").arg(balance, maxDollarWidth, 'f', 2);  // right-align
+            QString entry = QString("%1: %2").arg(amountStr).arg(QString::fromStdString(name));
+            ui->S_owedMostList->addItem(entry);
+        }
+    }
+
 }
+
 
 
 

@@ -46,6 +46,7 @@ private:
     void populateCustomerDisplay(const QString& filter);
     void MM_openCustomerButtonClicked();
     void MM_searchButtonClicked();
+    void MM_statsButtonClicked();
     void enlishLanguageToggled();
 
 
@@ -79,9 +80,9 @@ private:
     void OC_pastTransactionsButtonClicked();
 
 
-// Calculator Function
-    void calculatorButtonClicked();
-    void calculateButtonClicked();
-    void C_backButtonClicked();
+// Statistics Function
+    vector<pair<string, double>> customerBalances;
+    void S_backButtonClicked();
+    void setUpAllStats();
 };
 #endif // CUSTOMERMANAGER_H
