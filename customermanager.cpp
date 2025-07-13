@@ -41,6 +41,7 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->MM_english, &QRadioButton::toggled, this, &customerManager::enlishLanguageToggled);
 
 
+
     // Seting up the csutomer graph
     customerGraph = new BalanceGraph();
     QVBoxLayout* layout = new QVBoxLayout(ui->OC_graphFrame);
@@ -159,7 +160,7 @@ void customerManager::backUpData() {
         }
 
         // Backup the totalBalanceHistory.txt file
-        QString sourceFile = "totalBalanceHistory.txt";
+        QString sourceFile = QString::fromStdString(totalBalanceHistory_file);
         QString destFile = datedFolder + "/totalBalanceHistory.txt";
 
         if (fs::exists(sourceFile.toStdString())) {

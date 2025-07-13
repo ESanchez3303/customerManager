@@ -16038,8 +16038,8 @@
    </widget>
    <zorder>AC_frame</zorder>
    <zorder>OC_frame</zorder>
-   <zorder>S_frame</zorder>
    <zorder>MM_frame</zorder>
+   <zorder>S_frame</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
