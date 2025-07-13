@@ -453,6 +453,9 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
     // Clearing the inputs
     switchFrame(ui->AC_frame);
+
+    // Updating the stats
+    setUpAllStats();
 }
 
 
@@ -578,6 +581,8 @@ void customerManager::OC_changeBalance(QString type){
     // Refreshing the graph
     customerGraph->setTransactions(current_customer.transactions);
 
+    // Updating the stats page
+    setUpAllStats();
 }
 
 void customerManager::OC_editButtonClicked(){
