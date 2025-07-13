@@ -34,6 +34,12 @@ void BalanceGraph::setTransactions(const std::vector<std::string>& transactions)
     update(); // Trigger repaint
 }
 
+
+void BalanceGraph::setBalanceHistory(const std::vector<double>& balances){
+    balanceHistory = balances;
+    update();
+}
+
 void BalanceGraph::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter painter(this);

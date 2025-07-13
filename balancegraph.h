@@ -11,6 +11,7 @@ class BalanceGraph : public QWidget {
 public:
     explicit BalanceGraph(QWidget *parent = nullptr);
     void setTransactions(const std::vector<std::string>& transactions);
+    void setBalanceHistory(const std::vector<double>& balances);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

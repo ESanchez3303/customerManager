@@ -28,6 +28,8 @@ private:
     string filePath = "customers";
 
 
+
+
 // Constants for styles
     QString const errorStyle_textInput = "color:white;background:red;";
     QString const normalStyle_textInput = "color:black;background:white;";
@@ -60,7 +62,7 @@ private:
 
 
 // Open Customer Functions:
-    BalanceGraph* graph = nullptr;
+    BalanceGraph* customerGraph = nullptr;
     bool transactionsShowing = false;
     QString hideTransactionText;
     QString showTransactionText;
@@ -81,8 +83,29 @@ private:
 
 
 // Statistics Function
+    string totalBalanceHistory_file = "totalBalanceHistory.txt";
     vector<pair<string, double>> customerBalances;
+    BalanceGraph* statsGraph = nullptr;
     void S_backButtonClicked();
     void setUpAllStats();
+    void updateBalanceHistory(double curr_totalBalance);
 };
 #endif // CUSTOMERMANAGER_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,11 +11,11 @@
 
 using namespace std;
 
-// Destructor
+// Destructor: ==============================================================================================================================
 customerManager::~customerManager(){delete ui;}
 
 
-// Constructor
+// Constructor: =============================================================================================================================
 customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new Ui::customerManager){
     ui->setupUi(this);
 
@@ -41,11 +41,20 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     connect(ui->MM_english, &QRadioButton::toggled, this, &customerManager::enlishLanguageToggled);
 
 
-    // Seting up the graph
-    graph = new BalanceGraph();
+    // Seting up the csutomer graph
+    customerGraph = new BalanceGraph();
     QVBoxLayout* layout = new QVBoxLayout(ui->OC_graphFrame);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(graph);
+    layout->addWidget(customerGraph);
+
+    // Setting up the statistics graph
+    statsGraph = new BalanceGraph();
+    layout = new QVBoxLayout(ui->S_owedGraph);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(statsGraph);
+
+    // Resetting layout pointer
+    layout = nullptr;
 
 
     // Setting the tab orders
@@ -79,7 +88,11 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     // Switching to Main Menu Frame
     switchFrame(ui->MM_frame);
 
+    // Loading all stats to also save the current balance history
+    setUpAllStats();
+
 }
+
 
 // Helper Functions: ========================================================================================================================
 bool customerManager::loadCustomerFromDisplay(){
@@ -117,7 +130,7 @@ bool customerManager::loadCustomerFromDisplay(){
 
 
 
-// Frame Control: ========================================================================================================================
+// Frame Control: ==========================================================================================================================
 void customerManager::switchFrame(QFrame* targetFrame){
     // Hiding all frames
     ui->MM_frame->hide();
@@ -167,7 +180,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
         transactionsShowing = false;
 
         // Setting up the graph
-        graph->setTransactions(current_customer.transactions);
+        customerGraph->setTransactions(current_customer.transactions);
 
         // Refreshing transaction window
         refreshTransactionDisplay();
@@ -183,7 +196,7 @@ void customerManager::switchFrame(QFrame* targetFrame){
 
 
 
-// Main Menu Functions: ========================================================================================================================
+// Main Menu Functions: ====================================================================================================================
 void customerManager::MM_addCustomerClicked()  { switchFrame(ui->AC_frame); }
 
 void customerManager::MM_statsButtonClicked(){ switchFrame(ui->S_frame) ; }
@@ -242,9 +255,9 @@ void customerManager::enlishLanguageToggled(){
         // Add Customer:
         ui->AC_label->setText("Add Customer");
         ui->AC_label_5->setText("Name:");
-        ui->AC_nameInput->setPlaceholderText("Enter Name.");
+        ui->AC_nameInput->setPlaceholderText("Enter Name");
         ui->AC_label_3->setText("Phone Number:");
-        ui->AC_phoneInput->setPlaceholderText("Enter Phone Number.");
+        ui->AC_phoneInput->setPlaceholderText("Enter Phone Number");
         ui->AC_label_4->setText("Balance:");
         ui->AC_saveCustomerButton->setText("Save Customer");
         ui->AC_label_6->setText("Address:");
@@ -270,6 +283,12 @@ void customerManager::enlishLanguageToggled(){
         confirmTransactionTitle = "Confirm Transaction";
         confirmTransactionMessage = "Please confirm this action";
 
+        // Statistics:
+        ui->S_title->setText("Statistics");
+        ui->S_owedLabel->setText("Total Owed:");
+        ui->S_gainedLabel->setText("Total Gained:");
+        ui->S_owedHistoryLabel->setText("Total Owed History");
+        ui->S_mostOwedLabel->setText("Most Debeted Customers");
 
     }
     // Changing langauge to spanish
@@ -285,9 +304,9 @@ void customerManager::enlishLanguageToggled(){
         // Add Customer:
         ui->AC_label->setText("Agregar Cliente");
         ui->AC_label_5->setText("Nombre:");
-        ui->AC_nameInput->setPlaceholderText("Ingrese el Nombre.");
+        ui->AC_nameInput->setPlaceholderText("Ingrese el Nombre");
         ui->AC_label_3->setText("Teléfono:");
-        ui->AC_phoneInput->setPlaceholderText("Ingrese el Número de Teléfono.");
+        ui->AC_phoneInput->setPlaceholderText("Ingrese el Número de Teléfono");
         ui->AC_label_4->setText("Saldo:");
         ui->AC_saveCustomerButton->setText("Guardar Cliente");
         ui->AC_label_6->setText("Ubicacion:");
@@ -312,11 +331,19 @@ void customerManager::enlishLanguageToggled(){
         negativeBalanceMessage = "Esta transacción hará que el saldo sea negativo.";
         confirmTransactionTitle = "Confirmar Transacción";
         confirmTransactionMessage = "Por favor confirme esta acción";
+
+        // Statistics:
+        ui->S_title->setText("Estadísticas");
+        ui->S_owedLabel->setText("Total Adeudado:");
+        ui->S_gainedLabel->setText("Total Ganado:");
+        ui->S_owedHistoryLabel->setText("Historial de Deudas Totales:");
+        ui->S_mostOwedLabel->setText("Clientes Más Endeudados:");
     }
 }
 
 
-// Adding Customer Functions ====================================================================================================================
+
+// Adding Customer Functions ===============================================================================================================
 void customerManager::AC_backButtonClicked(){ switchFrame(ui->MM_frame); }
 
 void customerManager::AC_markError(QLineEdit* target){
@@ -380,7 +407,7 @@ void customerManager::AC_savedCustomerButtonClicked(){
 
 
 
-// Open Customer Functions: ========================================================================================================================
+// Open Customer Functions: ================================================================================================================
 void customerManager::OC_backButtonClicked(){switchFrame(ui->MM_frame);}
 
 void customerManager::refreshTransactionDisplay() {
@@ -434,7 +461,6 @@ void customerManager::refreshTransactionDisplay() {
     ui->OC_transactionsDisplay->setColumnWidth(1, 100);
     ui->OC_transactionsDisplay->setColumnWidth(2, 702);
 }
-
 
 void customerManager::OC_descreaseButtonClicked(){ OC_changeBalance("|-|"); }
 
@@ -500,7 +526,7 @@ void customerManager::OC_changeBalance(QString type){
     ui->OC_balance->setText(QString::number(current_customer.balance,'f',2));
 
     // Refreshing the graph
-    graph->setTransactions(current_customer.transactions);
+    customerGraph->setTransactions(current_customer.transactions);
 
 }
 
@@ -626,7 +652,9 @@ void customerManager::OC_pastTransactionsButtonClicked(){
     }
 }
 
-// Statistics Functions: ============================================================================================================================
+
+
+// Statistics Functions: ===================================================================================================================
 
 
 void customerManager::S_backButtonClicked(){
@@ -634,6 +662,7 @@ void customerManager::S_backButtonClicked(){
 }
 
 void customerManager::setUpAllStats() {
+
     double runningTotalOwed = 0;
     double runningTotalGained = 0;
 
@@ -723,6 +752,53 @@ void customerManager::setUpAllStats() {
             ui->S_owedMostList->addItem(entry);
         }
     }
+
+    // Update the balance history file and the graph
+    updateBalanceHistory(runningTotalOwed);
+
+
+}
+
+void customerManager::updateBalanceHistory(double curr_totalBalance){
+
+    // Checking if the totalOwedFile exists, if not then create it
+    ifstream balanceHistoryFile(totalBalanceHistory_file);
+    if(!balanceHistoryFile){                          // If file has not been created yet
+        ofstream temp_file(totalBalanceHistory_file); // Create file and write current total balance as first entry
+        temp_file << curr_totalBalance << endl;
+        temp_file.close();
+        return;                                       // Do not update the graph since there is only one
+    }
+
+
+    // Grab all history from file and put into the vector
+    vector<double> allBalances;
+    string balance_string;
+    double balance_double;
+    while(getline(balanceHistoryFile, balance_string)){
+        try {
+            balance_double = stod(balance_string);
+        } catch (const std::invalid_argument&) {
+            QMessageBox::critical(this, "ERROR", "Balance file is corrupted. Please check the BALANCE FILE.");
+            switchFrame(ui->MM_frame);
+            balanceHistoryFile.close();
+            return;
+        }
+        allBalances.push_back(balance_double);
+    }
+    balanceHistoryFile.close();
+
+    // Adding to the end of the vector today's balance if its not the same as the last one in the vector
+    if(allBalances[allBalances.size()-1] != curr_totalBalance){
+        allBalances.push_back(curr_totalBalance);
+        ofstream writting_file(totalBalanceHistory_file, ios::app);
+        writting_file << curr_totalBalance << endl;
+        writting_file.close();
+    }
+
+
+    // Using the object graph we have saved for showing the balances, update the graph
+    statsGraph->setBalanceHistory(allBalances);
 
 }
 
