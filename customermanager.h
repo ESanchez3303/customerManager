@@ -7,6 +7,15 @@
 #include <QFrame>
 #include <QLineEdit>
 
+
+// ==========================< PATHS >==============================//|
+#define CUSTOMERPATH     ".0programFiles/customers";                 //|
+#define BACKUPPATH       ".0programFiles/backUps";                   //|
+#define BALANCEHISTFILE  ".0programFiles/totalBalanceHistory.txt";   //|
+// =================================================================//|
+
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class customerManager;
@@ -25,7 +34,7 @@ private:
 
 // Customer object
     customer current_customer;
-    string filePath = "customers";
+    string filePath = CUSTOMERPATH;
 
 
 
@@ -40,7 +49,7 @@ private:
     bool loadCustomerFromDisplay();
 
 // Back Up functions:
-    string backUpPath_str = "backUps";
+    string backUpPath_str = BACKUPPATH;
     void backUpData();
 
 
@@ -88,7 +97,7 @@ private:
 
 
 // Statistics Function
-    string totalBalanceHistory_file = "totalBalanceHistory.txt";
+    string totalBalanceHistory_file = BALANCEHISTFILE;
     vector<pair<string, double>> customerBalances;
     BalanceGraph* statsGraph = nullptr;
     void S_backButtonClicked();

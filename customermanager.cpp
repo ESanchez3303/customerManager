@@ -130,14 +130,14 @@ bool customerManager::loadCustomerFromDisplay(){
 }
 
 void customerManager::backUpData() {
-    namespace fs = std::filesystem;
+    namespace fs = filesystem;
 
     QString backUpPath = QString::fromStdString(backUpPath_str);
-    QString currentDate = QDate::currentDate().toString("yyyy-MM-dd");
+    QString currentDate = QDate::currentDate().addDays(-1).toString("yyyy-MM-dd");
     QString datedFolder = backUpPath + "/" + currentDate;
 
 
-    // If backup for today already exists, do nothing
+    // If backup for today already exists, do nothing since we want yesterdays backup
     if (fs::exists(datedFolder.toStdString()))
         return;
 
@@ -171,7 +171,7 @@ void customerManager::backUpData() {
 
 
 
-    } catch (const std::exception& e) {
+    } catch (const exception& e) {
         QMessageBox::critical(this, "ERORR", "Error in creating backup. Location: 02.");
         return;
     }
@@ -259,14 +259,14 @@ void customerManager::populateCustomerDisplay(const QString& filter) {
     // Clear the display
     ui->MM_customerDisplay->clear();
 
-    namespace fs = std::filesystem;
+    namespace fs = filesystem;
     QString customerPath = QString::fromStdString(filePath);
 
     try {
         for (const auto& entry : fs::directory_iterator(customerPath.toStdString())) {
             if (entry.is_regular_file()) {
-                std::string fullName = entry.path().filename().string();  // e.g., "JohnDoe.txt"
-                std::string nameOnly = fullName.substr(0, fullName.length() - 4); // Remove ".txt"
+                string fullName = entry.path().filename().string();  // e.g., "JohnDoe.txt"
+                string nameOnly = fullName.substr(0, fullName.length() - 4); // Remove ".txt"
 
                 QString qName = QString::fromStdString(nameOnly);
 
@@ -276,7 +276,7 @@ void customerManager::populateCustomerDisplay(const QString& filter) {
                 }
             }
         }
-    } catch (const std::exception& e) {
+    } catch (const exception& e) {
         QMessageBox::critical(this, "ERROR", "Could not open the folder to load customers.");
     }
 }
@@ -469,7 +469,7 @@ void customerManager::refreshTransactionDisplay() {
     ui->OC_transactionsDisplay->setRowCount(0);
 
     // Helper to create a styled table item
-    auto makeItem = [](const std::string& value, bool bold = false, int fontSize = -1, QColor color = Qt::black) {
+    auto makeItem = [](const string& value, bool bold = false, int fontSize = -1, QColor color = Qt::black) {
         QTableWidgetItem* item = new QTableWidgetItem(QString::fromStdString(value));
         item->setFlags(item->flags() & ~Qt::ItemIsEditable);  // Make uneditable
         item->setTextAlignment(Qt::AlignCenter);              // Centered
@@ -485,14 +485,14 @@ void customerManager::refreshTransactionDisplay() {
         return item;
     };
 
-    for (const std::string& transactionStr : current_customer.transactions) {
-        std::stringstream ss(transactionStr);
-        std::string date, type, amount, comment;
+    for (const string& transactionStr : current_customer.transactions) {
+        stringstream ss(transactionStr);
+        string date, type, amount, comment;
 
-        std::getline(ss, date, '|');
-        std::getline(ss, type, '|');
-        std::getline(ss, amount, '|');
-        std::getline(ss, comment, '|'); // May be empty
+        getline(ss, date, '|');
+        getline(ss, type, '|');
+        getline(ss, amount, '|');
+        getline(ss, comment, '|'); // May be empty
 
         int currentRow = ui->OC_transactionsDisplay->rowCount();
         ui->OC_transactionsDisplay->insertRow(currentRow);
@@ -661,8 +661,8 @@ void customerManager::OC_edittingSaveButtonClicked(){
     if(changedName){
         string oldFilePath = filePath + "/" + current_customer.name + ".txt";
         try {
-            std::filesystem::remove(oldFilePath);
-        } catch (const std::filesystem::filesystem_error& e) {
+            filesystem::remove(oldFilePath);
+        } catch (const filesystem::filesystem_error& e) {
             QMessageBox::critical(this, errorTitle, "Failed to remove old file: " + QString::fromStdString(e.what()));
         }
     }
@@ -721,30 +721,30 @@ void customerManager::setUpAllStats() {
     double runningTotalOwed = 0;
     double runningTotalGained = 0;
 
-    std::vector<std::pair<std::string, double>> customerBalances;
+    vector<pair<string, double>> customerBalances;
 
-    namespace fs = std::filesystem;
+    namespace fs = filesystem;
     for (const auto& entry : fs::directory_iterator(filePath)) {
         if (entry.is_regular_file()) {
-            std::string fullName = entry.path().filename().string();
+            string fullName = entry.path().filename().string();
             fullName = fullName.substr(0, fullName.length() - 4);  // remove ".txt"
 
-            std::ifstream file(entry.path());
-            std::string line;
+            ifstream file(entry.path());
+            string line;
 
             // Skip the phone number
-            std::getline(file, line);
+            getline(file, line);
 
             // Read the second line for the current balance
-            if (std::getline(file, line)) {
+            if (getline(file, line)) {
                 try {
-                    double balance = std::stod(line);
+                    double balance = stod(line);
                     runningTotalOwed += balance;
 
                     // Store name and balance
                     customerBalances.push_back({ fullName, balance });
 
-                } catch (const std::invalid_argument&) {
+                } catch (const invalid_argument&) {
                     QString errorMessage = "One of the files is corrupted. Please check the file named: " + QString::fromStdString(entry.path().filename().string());
                     QMessageBox::critical(this, "ERROR", errorMessage);
                     switchFrame(ui->MM_frame);
@@ -753,10 +753,10 @@ void customerManager::setUpAllStats() {
             }
 
             // Skip address line
-            std::getline(file, line);
+            getline(file, line);
             double lastValue;
 
-            while (std::getline(file, line)) {
+            while (getline(file, line)) {
                 if (line.empty()) continue;
                 line = line.substr(line.find("|") + 1);
                 if (line[1] == '-') continue;  // skip negatives
@@ -764,12 +764,12 @@ void customerManager::setUpAllStats() {
                 line = line.substr(0, line.find("|"));
 
                 try {
-                    double balance = std::stod(line);
+                    double balance = stod(line);
                     runningTotalGained += balance;
                     lastValue = balance;
                     if (balance == 380)
-                        std::cout << entry.path().filename().string() << std::endl;
-                } catch (const std::invalid_argument&) {
+                        cout << entry.path().filename().string() << endl;
+                } catch (const invalid_argument&) {
                     QString errorMessage = "One of the files is corrupted. Please check the file named: " + QString::fromStdString(entry.path().filename().string());
                     QMessageBox::critical(this, "ERROR", errorMessage);
                     switchFrame(ui->MM_frame);
@@ -783,7 +783,7 @@ void customerManager::setUpAllStats() {
     }
 
     // Sorting the customer balances
-    std::sort(customerBalances.begin(), customerBalances.end(), [](const auto& a, const auto& b) {
+    sort(customerBalances.begin(), customerBalances.end(), [](const auto& a, const auto& b) {
         return a.second > b.second;
     });
 
@@ -810,9 +810,9 @@ void customerManager::setUpAllStats() {
 
     // Update the balance history file and the graph
     updateBalanceHistory(runningTotalOwed);
-
-
 }
+
+
 
 void customerManager::updateBalanceHistory(double curr_totalBalance){
 
@@ -833,7 +833,7 @@ void customerManager::updateBalanceHistory(double curr_totalBalance){
     while(getline(balanceHistoryFile, balance_string)){
         try {
             balance_double = stod(balance_string);
-        } catch (const std::invalid_argument&) {
+        } catch (const invalid_argument&) {
             QMessageBox::critical(this, "ERROR", "Balance file is corrupted. Please check the BALANCE FILE.");
             switchFrame(ui->MM_frame);
             balanceHistoryFile.close();
