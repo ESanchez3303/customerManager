@@ -713,9 +713,9 @@
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -740,18 +740,18 @@
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -787,9 +787,9 @@
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -814,18 +814,18 @@
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -861,9 +861,9 @@
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -888,18 +888,18 @@
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>138</red>
-           <green>195</green>
-           <blue>171</blue>
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
           </color>
          </brush>
         </colorrole>
@@ -928,14 +928,14 @@
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
-      <string>color:black; background: rgb(138, 195, 171)</string>
+      <string notr="true">background:black;</string>
      </property>
      <property name="text">
       <string/>
      </property>
      <property name="icon">
       <iconset resource="images.qrc">
-       <normaloff>:/Images/calculatorIcon.png</normaloff>:/Images/calculatorIcon.png</iconset>
+       <normaloff>:/Images/statsimage.png</normaloff>:/Images/statsimage.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -16038,8 +16038,8 @@
    </widget>
    <zorder>AC_frame</zorder>
    <zorder>OC_frame</zorder>
-   <zorder>MM_frame</zorder>
    <zorder>S_frame</zorder>
+   <zorder>MM_frame</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

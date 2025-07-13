@@ -39,6 +39,11 @@ private:
     QString noCustomerChosenMessage;
     bool loadCustomerFromDisplay();
 
+// Back Up functions:
+    string backUpPath_str = "backUps";
+    void backUpData();
+
+
 // Frame Control
     void switchFrame(QFrame* targetFrame);
 

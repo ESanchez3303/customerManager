@@ -91,6 +91,9 @@ customerManager::customerManager(QWidget *parent): QMainWindow(parent), ui(new U
     // Loading all stats to also save the current balance history
     setUpAllStats();
 
+    // Making backup on the customers and the balance history
+    backUpData();
+
 }
 
 
@@ -126,6 +129,53 @@ bool customerManager::loadCustomerFromDisplay(){
     return true;
 }
 
+void customerManager::backUpData() {
+    namespace fs = std::filesystem;
+
+    QString backUpPath = QString::fromStdString(backUpPath_str);
+    QString currentDate = QDate::currentDate().toString("yyyy-MM-dd");
+    QString datedFolder = backUpPath + "/" + currentDate;
+
+
+    // If backup for today already exists, do nothing
+    if (fs::exists(datedFolder.toStdString()))
+        return;
+
+
+    try {
+        // Create the dated backup folder
+        fs::create_directories(datedFolder.toStdString());
+
+        // Backup the "customers" folder
+        QString sourceCustomerFolder = QString::fromStdString(filePath);
+        QString destCustomerFolder = datedFolder + "/customers";
+        fs::create_directories(destCustomerFolder.toStdString());
+
+        for (const auto& entry : fs::recursive_directory_iterator(sourceCustomerFolder.toStdString())) {
+            const auto& path = entry.path();
+            auto relativePath = fs::relative(path, sourceCustomerFolder.toStdString());
+            fs::copy(path, fs::path(destCustomerFolder.toStdString()) / relativePath,
+                     fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+        }
+
+        // Backup the totalBalanceHistory.txt file
+        QString sourceFile = "totalBalanceHistory.txt";
+        QString destFile = datedFolder + "/totalBalanceHistory.txt";
+
+        if (fs::exists(sourceFile.toStdString())) {
+            fs::copy_file(sourceFile.toStdString(), destFile.toStdString(),
+                          fs::copy_options::overwrite_existing);
+        } else {
+            QMessageBox::critical(this,"ERROR", "Error in creating backup. Location: 01");
+        }
+
+
+
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "ERORR", "Error in creating backup. Location: 02.");
+        return;
+    }
+}
 
 
 
