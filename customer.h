@@ -35,6 +35,7 @@ public:
         name = "";
         phoneNumber = "";
         balance = 0;
+        address = "";
         transactions.clear();
     }
 

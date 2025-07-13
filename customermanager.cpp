@@ -133,10 +133,12 @@ void customerManager::switchFrame(QFrame* targetFrame){
         populateCustomerDisplay("");
     }
     else if(targetFrame == ui->AC_frame){
+        current_customer.clear();
         // Resetting the values
         ui->AC_nameInput->setText("");
         ui->AC_phoneInput->setText("");
         ui->AC_balanceInput->setValue(0);
+        ui->AC_addressInput->setText("");
         // Resetting the colors
         ui->AC_nameInput->setStyleSheet("color:black;background:white;");
         ui->AC_phoneInput->setStyleSheet("color:black;background:white;");
