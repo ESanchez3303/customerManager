@@ -1,4 +1,4 @@
-Made this to keep track of balances. See photos for demo.
+Made this to keep track of balances. See photos for demo. Download Release and start the "customerManage.exe" file
 
 Main Page:
 Starts off in spanish since the user is spanish speaking, but there is a radio button on top left to change everything to english
