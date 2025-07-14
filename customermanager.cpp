@@ -528,7 +528,7 @@ void customerManager::OC_changeBalance(QString type){
     }
 
     if(type == "|-|"){
-        if((current_customer.balance - ui->OC_amountInput->value()) <= 0){
+        if((current_customer.balance - ui->OC_amountInput->value()) < 0){
             QMessageBox::warning(this, negativeBalanceTitle, negativeBalanceMessage);
             return;
         }
