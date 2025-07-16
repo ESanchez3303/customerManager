@@ -337,7 +337,6 @@ void customerManager::enlishLanguageToggled(){
         // Statistics:
         ui->S_title->setText("Statistics");
         ui->S_owedLabel->setText("Total Owed:");
-        ui->S_gainedLabel->setText("Total Gained:");
         ui->S_owedHistoryLabel->setText("Total Owed History");
         ui->S_mostOwedLabel->setText("Most Debeted Customers");
 
@@ -386,7 +385,6 @@ void customerManager::enlishLanguageToggled(){
         // Statistics:
         ui->S_title->setText("Estadísticas");
         ui->S_owedLabel->setText("Total Adeudado:");
-        ui->S_gainedLabel->setText("Total Ganado:");
         ui->S_owedHistoryLabel->setText("Historial de Deudas Totales:");
         ui->S_mostOwedLabel->setText("Clientes Más Endeudados:");
     }
@@ -720,7 +718,6 @@ void customerManager::S_backButtonClicked(){
 void customerManager::setUpAllStats() {
 
     double runningTotalOwed = 0;
-    double runningTotalGained = 0;
 
     vector<pair<string, double>> customerBalances;
 
@@ -766,7 +763,6 @@ void customerManager::setUpAllStats() {
 
                 try {
                     double balance = stod(line);
-                    runningTotalGained += balance;
                     lastValue = balance;
                     if (balance == 380)
                         cout << entry.path().filename().string() << endl;
@@ -778,7 +774,6 @@ void customerManager::setUpAllStats() {
                 }
             }
 
-            runningTotalGained -= lastValue;
             file.close();
         }
     }
@@ -790,7 +785,6 @@ void customerManager::setUpAllStats() {
 
     // Display totals
     ui->S_totalOwed->setText(QString::number(runningTotalOwed, 'f', 2));
-    ui->S_totalGained->setText(QString::number(runningTotalGained, 'f', 2));
 
 
     // Displaying the most owed list
